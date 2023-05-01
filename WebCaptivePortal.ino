@@ -1,71 +1,35 @@
-#include <ESP8266WiFi.h>
-
-void handleRoot()
+bool captivePortal(AsyncWebServerRequest *request)
 {
-  if (captivePortal())
-    return;
-
-  if (webServer.method() != HTTP_GET)
-  {
-    methodNotAllowed("GET");
-    return;
-  }
-
-  String page;
-  page = F(
-      "<!DOCTYPE html><html lang='en'>"
-      "<head>"
-      "<meta name='viewport' content='width=device-width'>"
-      "<title>Robot</title>"
-      "</head>"
-      "<body>"
-      "<h1>Robot</h1>"
-      "<div>Welcome to the balance-controlled cylindrical robot portal</div>"
-      "</body>"
-      "</html>");
-
-  webServer.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  webServer.sendHeader("Pragma", "no-cache");
-  webServer.sendHeader("Expires", "-1");
-  webServer.send(200, "text/html", page);
-
-  Serial.println(200);
-}
-
-bool captivePortal()
-{
-  char *httpMethods[] = {"ANY", "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"};
-
-  Serial.print(webServer.client().remoteIP());
+  Serial.print(request->client()->remoteIP());
   Serial.print(" - \"");
-  Serial.print(httpMethods[webServer.method()]);
+  Serial.print(httpMethod(request->method()));
   Serial.print(" ");
-  Serial.print(webServer.uri());
+  Serial.print(request->url());
 
-  if (webServer.args() > 0)
+  if (request->args() > 0)
   {
     Serial.print("?");
-    for (int i = 0; i < webServer.args(); i++)
+    for (int i = 0; i < request->args(); i++)
     {
-      if (!i) Serial.print("&");
-      Serial.print(webServer.argName(i));
+      if (!i)
+        Serial.print("&");
+      Serial.print(request->argName(i));
       Serial.print("=");
-      Serial.print(webServer.arg(i));
+      Serial.print(request->arg(i));
     }
   }
 
   Serial.print("\" ");
 
-  if (webServer.hostHeader() != WiFi.softAPIP().toString())
+  if (request->header("Host") != WiFi.softAPIP().toString())
   {
     String redirectHost = WiFi.softAPIP().toString();
 
-    webServer.sendHeader("Location", F("http://") + redirectHost);
-    webServer.send(302, "text/plain", "");
+    request->redirect(F("http://") + redirectHost);
 
     Serial.print(302);
     Serial.print(" (");
-    Serial.print(webServer.hostHeader());
+    Serial.print(request->header("Host"));
     Serial.print(" -> ");
     Serial.print(redirectHost);
     Serial.println(")");
@@ -74,4 +38,45 @@ bool captivePortal()
   }
 
   return false;
+}
+
+void handleCaptivePortal(AsyncWebServerRequest *request)
+{
+  if (captivePortal(request))
+    return;
+
+  if (request->method() != HTTP_GET)
+  {
+    methodNotAllowed(request, "GET");
+    return;
+  }
+
+  AsyncResponseStream *response = request->beginResponseStream("text/html");
+  response->print(
+      "<!DOCTYPE html><html lang='en'>"
+      "<head>"
+      "<meta name='viewport' content='width=device-width'>"
+      "<title>Robot</title>"
+      "</head>"
+      "<body>"
+      "<h1>Robot</h1>"
+      "<div>Welcome to the Robot Captive Portal</div>"
+      "<small id='test'></small>"
+      "<script>"
+      "if (!!window.EventSource) {"
+      "var source = new EventSource('/events');"
+      "source.addEventListener('open', function(e) { console.log('Robot Events Connected'); }, false);"
+      "source.addEventListener('error', function(e) { if (e.target.readyState != EventSource.OPEN) { console.log('Robot Events Disconnected'); document.getElementById('test').innerHTML = 'Disconnected'; } }, false);"
+      "source.addEventListener('test', function(e) { document.getElementById('test').innerHTML = e.data; }, false);"
+      "}"
+      "</script>"
+      "</body>"
+      "</html>");
+  response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  response->addHeader("Pragma", "no-cache");
+  response->addHeader("Expires", "-1");
+
+  request->send(response);
+
+  Serial.println(200);
 }
