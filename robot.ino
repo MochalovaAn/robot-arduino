@@ -1,10 +1,11 @@
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
+#include <ESP8266WebServer.h>
 #include <AccelStepper.h>
 
+#include "ESP8266EventSource.h"
 #include "Imu.h"
+#include "Program.h"
 
 // Wi-Fi params
 
@@ -23,10 +24,11 @@ IPAddress WIFI_NETMASK(255, 255, 255, 0);
 #define STEPPER_IN4 12 // D6
 
 DNSServer dnsServer;
-AsyncWebServer webServer(80);
-AsyncEventSource sseServer("/events");
+ESP8266WebServer webServer(80);
+ESP8266EventSource events("");
 AccelStepper stepper(AccelStepper::HALF4WIRE, STEPPER_IN1, STEPPER_IN3, STEPPER_IN2, STEPPER_IN4);
 Imu imu;
+Program program(&stepper);
 
 void setup()
 {
@@ -39,15 +41,15 @@ void setup()
 
   if (!imu.init(20))
   {
-    Serial.println("Error: MPU-6050 IMU not found");
-    Serial.println();
-    stop(1);
+    Serial.println("Error: MPU-6050 not found");
+    // stop(1);
   }
 
   Serial.print("Device ID: ");
   Serial.println(imu.getDeviceID());
 
   // setup Wi-Fi access point
+
   Serial.println("Starting Wi-Fi access point...");
 
   WiFi.mode(WIFI_AP);
@@ -55,7 +57,7 @@ void setup()
   if (!WiFi.softAP(WIFI_SSID, WIFI_PASSWORD))
   {
     Serial.println("Error: Failed to start Wi-Fi access point");
-    stop(2);
+    // stop(2);
   }
 
   Serial.print("Wi-Fi SSID: ");
@@ -64,48 +66,58 @@ void setup()
   Serial.println(WIFI_PASSWORD);
 
   // setup the DNS server redirecting all the domains to the Wi-Fi access point
+
   Serial.println("Starting DNS server...");
 
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   if (!dnsServer.start(53, "*", WIFI_LOCAL_IP))
   {
     Serial.println("Error: Failed to start DNS server");
-    stop(3);
+    // stop(3);
   }
 
   Serial.print("DNS-server IPv4: ");
   Serial.println(WIFI_LOCAL_IP);
 
   // setup WEB server page handlers
+
   Serial.println("Starting WEB server...");
 
   Serial.print("WEB-server URL: http://");
   Serial.println(WIFI_LOCAL_IP);
   Serial.println("EventSource URL: /events");
 
-  sseServer.onConnect(handleOnConnect);
+  events.onConnect(eventsOnConnect);
+  events.onDisconnect(eventsOnDisconnect);
+  events.begin(&webServer);
 
-  webServer.on("/", handleCaptivePortal);
+  webServer.on("/", handleRoot);
+  webServer.on("/events", handleEvents);
   webServer.on("/stepper/acceleration", handleStepperAcceleration);
-  webServer.on("/stepper/currentPosition", handleStepperCurrentPosition);
-  webServer.on("/stepper/currentSpeed", handleStepperCurrentSpeed);
+  webServer.on("/stepper/current-position", handleStepperCurrentPosition);
+  webServer.on("/stepper/current-speed", handleStepperCurrentSpeed);
   webServer.on("/stepper/disable", handleStepperDisable);
-  webServer.on("/stepper/distanceToGo", handleStepperDistanceToGo);
+  webServer.on("/stepper/distance-to-go", handleStepperDistanceToGo);
   webServer.on("/stepper/enable", handleStepperEnable);
-  webServer.on("/stepper/isRunning", handleStepperIsRunning);
+  webServer.on("/stepper/is-running", handleStepperIsRunning);
   webServer.on("/stepper/move", handleStepperMove);
-  webServer.on("/stepper/moveTo", handleStepperMoveTo);
   webServer.on("/stepper/reset", handleStepperReset);
   webServer.on("/stepper/speed", handleStepperSpeed);
-  webServer.on("/stepper/stepsPerRevolution", handleStepperStepsPerRevolution);
+  webServer.on("/stepper/steps-per-revolution", handleStepperStepsPerRevolution);
   webServer.on("/stepper/stop", handleStepperStop);
-  webServer.on("/stepper/targetPosition", handleStepperTargetPosition);
+  webServer.on("/stepper/target-position", handleStepperTargetPosition);
   webServer.on("/imu/roll", handleImuRoll);
   webServer.on("/imu/pitch", handleImuPitch);
   webServer.on("/imu/yaw", handleImuYaw);
   webServer.on("/imu/t", handleImuTemperature);
+  webServer.on("/program/text", handleProgramText);
+  webServer.on("/program/start", handleProgramStart);
+  webServer.on("/program/stop", handleProgramStop);
+  webServer.on("/program/state", handleProgramState);
+  webServer.on("/program/line", handleProgramLine);
+  webServer.on("/program/is-running", handleProgramIsRunning);
   webServer.onNotFound(handleNotFound);
-  webServer.addHandler(&sseServer);
+  webServer.collectHeaders("Last-Event-ID", "Content-Type");
   webServer.begin();
 
   Serial.println("Robot started");
@@ -117,33 +129,16 @@ unsigned long timer = 0;
 void loop()
 {
   dnsServer.processNextRequest();
+  webServer.handleClient();
+  events.keepAlive();
+  program.run();
   stepper.run();
   imu.getMotion();
 
-  // if (imu.getMotion())
-  // {
-  //   Serial.print(imu.roll);
-  //   Serial.print(" ");
-  //   Serial.print(imu.pitch);
-  //   Serial.print(" ");
-  //   Serial.print(imu.yaw);
-  //   Serial.println();
-  // }
-
   unsigned long now = millis();
-  if (now - timer > 100)
+  if (now > timer + 100)
   {
+    events.send(String(now).c_str(), "test", now);
     timer = now;
-
-    if (sseServer.count())
-    {
-      Serial.printf("%u %u\n", sseServer.count(), sseServer.avgPacketsWaiting());
-
-      if (!sseServer.avgPacketsWaiting())
-      {
-        Serial.println("Send event");
-        sseServer.send(String(now).c_str(), "test", now);
-      }
-    }
   }
 }

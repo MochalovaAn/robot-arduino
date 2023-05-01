@@ -1,273 +1,251 @@
-void handleStepperAcceleration(AsyncWebServerRequest *request)
+void handleStepperAcceleration()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_GET)
+  if (webServer.method() == HTTP_GET)
   {
-    float acceleration = stepper.acceleration();
-    String content = String(acceleration);
-    request->send(200, "text/plain", content.c_str());
+    String content = String(stepper.acceleration());
 
+    webServer.send(200, "text/plain", content);
     Serial.println(200);
   }
-  else if (request->method() == HTTP_POST)
+  else if (webServer.method() == HTTP_POST)
   {
-    if (!request->hasArg("value"))
+    if (webServer.args() != 1)
     {
-      badRequest(request);
+      badRequest();
       return;
     }
 
-    float acceleration = request->arg("value").toFloat();
+    float acceleration = webServer.arg(0).toFloat();
     stepper.setAcceleration(acceleration);
-    request->send(200, "text/plain", "");
 
+    webServer.send(200, "text/plain", "");
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "GET, POST");
+    methodNotAllowed("GET, POST");
 }
 
-void handleStepperCurrentPosition(AsyncWebServerRequest *request)
+void handleStepperCurrentPosition()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_GET)
+  if (webServer.method() == HTTP_GET)
   {
-    long position = stepper.currentPosition();
-    String content = String(position);
-    request->send(200, "text/plain", content.c_str());
+    String content = String(stepper.currentPosition());
 
+    webServer.send(200, "text/plain", content.c_str());
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "GET");
+    methodNotAllowed("GET");
 }
 
-void handleStepperCurrentSpeed(AsyncWebServerRequest *request)
+void handleStepperCurrentSpeed()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_GET)
+  if (webServer.method() == HTTP_GET)
   {
-    float speed = stepper.speed();
-    String content = String(speed);
-    request->send(200, "text/plain", content.c_str());
+    String content = String(stepper.speed());
 
+    webServer.send(200, "text/plain", content.c_str());
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "GET");
+    methodNotAllowed("GET");
 }
 
-void handleStepperDisable(AsyncWebServerRequest *request)
+void handleStepperDisable()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_POST)
+  if (webServer.method() == HTTP_POST)
   {
     stepper.disableOutputs();
-    request->send(200, "text/plain", "");
 
+    webServer.send(200, "text/plain", "");
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "POST");
+    methodNotAllowed("POST");
 }
 
-void handleStepperDistanceToGo(AsyncWebServerRequest *request)
+void handleStepperDistanceToGo()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_GET)
+  if (webServer.method() == HTTP_GET)
   {
-    long distance = stepper.distanceToGo();
-    String content = String(distance);
-    request->send(200, "text/plain", content.c_str());
+    String content = String(stepper.distanceToGo());
 
+    webServer.send(200, "text/plain", content.c_str());
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "GET");
+    methodNotAllowed("GET");
 }
 
-void handleStepperEnable(AsyncWebServerRequest *request)
+void handleStepperEnable()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_POST)
+  if (webServer.method() == HTTP_POST)
   {
     stepper.enableOutputs();
-    request->send(200, "text/plain", "");
 
+    webServer.send(200, "text/plain", "");
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "POST");
+    methodNotAllowed("POST");
 }
 
-void handleStepperIsRunning(AsyncWebServerRequest *request)
+void handleStepperIsRunning()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_GET)
+  if (webServer.method() == HTTP_GET)
   {
-    int state = stepper.isRunning() ? 1 : 0;
-    String content = String(state);
-    request->send(200, "text/plain", content.c_str());
+    String content = String((int)stepper.isRunning());
 
+    webServer.send(200, "text/plain", content.c_str());
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "GET");
+    methodNotAllowed("GET");
 }
 
-void handleStepperMove(AsyncWebServerRequest *request)
+void handleStepperMove()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_POST)
+  if (webServer.method() == HTTP_POST)
   {
-    if (!request->hasArg("value"))
+    if (webServer.hasArg("relative"))
     {
-      badRequest(request);
+      long relative = webServer.arg("relative").toInt();
+      stepper.move(relative);
+    }
+    else if (webServer.hasArg("absolute"))
+    {
+      long absolute = webServer.arg("absolute").toInt();
+      stepper.moveTo(absolute);
+    }
+    else
+    {
+      badRequest();
       return;
     }
 
-    long relative = request->arg("value").toInt();
-    stepper.move(relative);
-    request->send(200, "text/plain", "");
-
+    webServer.send(200, "text/plain", "");
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "POST");
+    methodNotAllowed("POST");
 }
 
-void handleStepperMoveTo(AsyncWebServerRequest *request)
+void handleStepperReset()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_POST)
+  if (webServer.method() == HTTP_POST)
   {
-    if (!request->hasArg("value"))
-    {
-      badRequest(request);
-      return;
-    }
-
-    long absolute = request->arg("value").toInt();
-    stepper.moveTo(absolute);
-    request->send(200, "text/plain", "");
-
-    Serial.println(200);
-  }
-  else
-    methodNotAllowed(request, "POST");
-}
-
-void handleStepperReset(AsyncWebServerRequest *request)
-{
-  if (captivePortal(request))
-    return;
-
-  if (request->method() == HTTP_POST)
-  {
-    long position = request->arg("value").toInt();
+    long position = webServer.arg("position").toInt();
     stepper.setCurrentPosition(position);
-    request->send(200, "text/plain", "");
 
+    webServer.send(200, "text/plain", "");
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "POST");
+    methodNotAllowed("POST");
 }
 
-void handleStepperSpeed(AsyncWebServerRequest *request)
+void handleStepperSpeed()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_GET)
+  if (webServer.method() == HTTP_GET)
   {
-    float speed = stepper.maxSpeed();
-    String content = String(speed);
-    request->send(200, "text/plain", content.c_str());
+    String content = String(stepper.maxSpeed());
 
+    webServer.send(200, "text/plain", content.c_str());
     Serial.print(200);
   }
-  else if (request->method() == HTTP_POST)
+  else if (webServer.method() == HTTP_POST)
   {
-    if (!request->hasArg("value"))
+    if (webServer.args() != 1)
     {
-      badRequest(request);
+      badRequest();
       return;
     }
 
-    float speed = request->arg("value").toFloat();
+    float speed = webServer.arg(0).toFloat();
     stepper.setMaxSpeed(speed);
-    request->send(200, "text/plain", "");
 
+    webServer.send(200, "text/plain", "");
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "GET, POST");
+    methodNotAllowed("GET, POST");
 }
 
-void handleStepperStepsPerRevolution(AsyncWebServerRequest *request)
+void handleStepperStepsPerRevolution()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_GET)
+  if (webServer.method() == HTTP_GET)
   {
-    String content = "4096";
-    request->send(200, "text/plain", content.c_str());
+    String content = "2048";
 
+    webServer.send(200, "text/plain", content.c_str());
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "GET");
+    methodNotAllowed("GET");
 }
 
-void handleStepperStop(AsyncWebServerRequest *request)
+void handleStepperStop()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_POST)
+  if (webServer.method() == HTTP_POST)
   {
-    stepper.stop();
-    request->send(200, "text/plain", "");
+    int force = webServer.arg("force").toInt();
+    force ? stepper.setCurrentPosition(stepper.currentPosition()) : stepper.stop();
 
+    webServer.send(200, "text/plain", "");
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "POST");
+    methodNotAllowed("POST");
 }
 
-void handleStepperTargetPosition(AsyncWebServerRequest *request)
+void handleStepperTargetPosition()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  if (request->method() == HTTP_GET)
+  if (webServer.method() == HTTP_GET)
   {
-    long position = stepper.targetPosition();
-    String content = String(position);
-    request->send(200, "text/plain", content.c_str());
+    String content = String(stepper.targetPosition());
 
+    webServer.send(200, "text/plain", content.c_str());
     Serial.println(200);
   }
   else
-    methodNotAllowed(request, "GET");
+    methodNotAllowed("GET");
 }

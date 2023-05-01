@@ -1,8 +1,8 @@
-void handleNotFound(AsyncWebServerRequest *request)
+void handleNotFound()
 {
-  if (captivePortal(request))
+  if (handleCaptivePortal())
     return;
 
-  request->send(404, "text/plain", "Not Found");
+  webServer.send(404, "text/plain", "Not Found");
   Serial.println(404);
 }

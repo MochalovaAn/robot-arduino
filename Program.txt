@@ -1,0 +1,11 @@
+set speed 1000
+set acceleration 500
+set timer 1000
+rotate 360
+set speed 500
+set timer 250
+rotate -360
+stop force
+step 2048
+step -2048
+repeat

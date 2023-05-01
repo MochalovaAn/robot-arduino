@@ -1,28 +1,40 @@
-char *httpMethod(WebRequestMethodComposite method)
+void logRequest()
 {
-  switch (method)
+  char *httpMethods[] = {"ANY", "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"};
+
+  Serial.print(webServer.client().remoteIP());
+  Serial.print(" - \"");
+  Serial.print(httpMethods[webServer.method()]);
+  Serial.print(" ");
+  Serial.print(webServer.uri());
+
+  if (webServer.args() > 0)
   {
-    case HTTP_GET: return "GET";
-    case HTTP_POST: return "POST";
-    case HTTP_DELETE: return "DELETE";
-    case HTTP_PUT: return "PUT";
-    case HTTP_PATCH: return "PATCH";
-    case HTTP_HEAD: return "HEAD";
-    case HTTP_OPTIONS: return "OPTIONS";
+    int count = 0;
+    for (int i = 0; i < webServer.args(); i++)
+    {
+      if (webServer.argName(i) == "plain")
+        break;
+      Serial.print(count ? "&" : "?");
+      Serial.print(webServer.argName(i));
+      Serial.print("=");
+      Serial.print(webServer.arg(i));
+      count++;
+    }
   }
-  return "ANY";
+
+  Serial.print("\" ");
 }
 
-void badRequest(AsyncWebServerRequest *request)
+void badRequest()
 {
-  request->send(400, "text/plain", "400 Bad Request");
+  webServer.send(400, "text/plain", "400 Bad Request");
   Serial.println(400);
 }
 
-void methodNotAllowed(AsyncWebServerRequest *request, String allow)
+void methodNotAllowed(String allow)
 {
-  AsyncWebServerResponse *response = request->beginResponse(405, "text/plain", "405 Method Not Allowed");
-  response->addHeader("Allow", allow);
-  request->send(response);
+  webServer.sendHeader("Allow", allow);
+  webServer.send(405, "text/plain", "405 Method Not Allowed");
   Serial.println(405);
 }
