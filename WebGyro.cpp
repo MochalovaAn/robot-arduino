@@ -13,6 +13,12 @@ void handleGyro()
     doc["roll"] = gyro.roll;
     doc["yaw"] = gyro.yaw;
     doc["pitch"] = gyro.pitch;
+    doc["ax"] = gyro.ax;
+    doc["ay"] = gyro.ay;
+    doc["az"] = gyro.az;
+    doc["gx"] = gyro.gx;
+    doc["gy"] = gyro.gy;
+    doc["gz"] = gyro.gz;
     doc["t"] = gyro.t;
 
     String content;

@@ -10,8 +10,9 @@ void handleProgram()
     DynamicJsonDocument doc(128);
 
     doc["state"] = program.state();
-    doc["cycle"] = program.cycle();
     doc["line"] = program.line();
+    doc["count"] = program.count();
+    doc["cycle"] = program.cycle();
     doc["isRunning"] = program.isRunning();
 
     String content;

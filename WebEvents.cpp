@@ -48,6 +48,7 @@ void eventsSendStatus(unsigned long now)
     DynamicJsonDocument doc(1024);
 
     doc["millis"] = now; 
+    doc["clients"] = events.count();
 
     doc["stepper"]["acceleration"] = stepper.acceleration();
     doc["stepper"]["speed"] = stepper.maxSpeed();
@@ -62,11 +63,18 @@ void eventsSendStatus(unsigned long now)
     doc["gyro"]["roll"] = gyro.roll;
     doc["gyro"]["pitch"] = gyro.pitch;
     doc["gyro"]["yaw"] = gyro.yaw;
+    doc["gyro"]["ax"] = gyro.ax;
+    doc["gyro"]["ay"] = gyro.ay;
+    doc["gyro"]["az"] = gyro.az;
+    doc["gyro"]["gx"] = gyro.gx;
+    doc["gyro"]["gy"] = gyro.gy;
+    doc["gyro"]["gz"] = gyro.gz;
     doc["gyro"]["t"] = gyro.t;
 
     doc["program"]["state"] = program.state();
-    doc["program"]["cycle"] = program.cycle();
     doc["program"]["line"] = program.line();
+    doc["program"]["count"] = program.count();
+    doc["program"]["cycle"] = program.cycle();
     doc["program"]["isRunning"] = program.isRunning();
 
     String data;

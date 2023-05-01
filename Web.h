@@ -5,12 +5,12 @@
 
 bool handleCaptivePortal();
 
-void handleRoot();
-
 void handleStepper();
 void handleStepperRotate();
 void handleStepperStop();
 void handleStepperReset();
+void handleStepperEnable();
+void handleStepperDisable();
 
 void handleGyro();
 
@@ -24,10 +24,12 @@ void eventsOnConnect(ESP8266EventSourceClient *client);
 void eventsOnDisconnect(ESP8266EventSourceClient *client);
 void eventsSendStatus(unsigned long now);
 
-void handleNotFound();
+void handleFile();
 
 void logRequest(bool eol);
 void badRequest();
+void notFound();
 void methodNotAllowed(String allow);
+void internalServerError();
 
 #endif // WEB_H

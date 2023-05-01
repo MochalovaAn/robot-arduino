@@ -38,6 +38,12 @@ void handleStepper()
       stepper.setMaxSpeed(speed);
     }
 
+    if (webServer.hasArg("rotate"))
+    {
+      long relative = webServer.arg("rotate").toInt();
+      stepper.move(relative);
+    }
+
     webServer.send(204);
     Serial.println(204);
   }
@@ -91,6 +97,38 @@ void handleStepperReset()
   {
     long position = webServer.arg("position").toInt();
     stepper.setCurrentPosition(position);
+
+    webServer.send(204);
+    Serial.println(204);
+  }
+  else
+    methodNotAllowed("POST");
+}
+
+void handleStepperEnable()
+{
+  if (handleCaptivePortal())
+    return;
+
+  if (webServer.method() == HTTP_POST)
+  {
+    stepper.enableOutputs();
+
+    webServer.send(204);
+    Serial.println(204);
+  }
+  else
+    methodNotAllowed("POST");
+}
+
+void handleStepperDisable()
+{
+  if (handleCaptivePortal())
+    return;
+
+  if (webServer.method() == HTTP_POST)
+  {
+    stepper.disableOutputs();
 
     webServer.send(204);
     Serial.println(204);

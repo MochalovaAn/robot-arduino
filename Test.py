@@ -23,6 +23,12 @@ print("POST /stepper/reset", response.status_code, response.reason)
 response = requests.post("http://172.16.0.1/stepper/reset?position=1024")
 print("POST /stepper/reset?position=1024", response.status_code, response.reason)
 
+response = requests.post("http://172.16.0.1/stepper/disable")
+print("POST /stepper/reset", response.status_code, response.reason)
+
+response = requests.post("http://172.16.0.1/stepper/enable")
+print("POST /stepper/reset", response.status_code, response.reason)
+
 response = requests.get("http://172.16.0.1/gyro")
 gyro_data = response.json()
 print("GET /gyro", response.status_code, response.reason)

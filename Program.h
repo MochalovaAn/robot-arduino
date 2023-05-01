@@ -25,6 +25,7 @@ private:
   size_t _line;
   int _state;
   unsigned long _timer;
+  bool _pause;
 
 public:
   Program(AccelStepper *stepper);
@@ -38,6 +39,7 @@ public:
   bool stop(int force);
 
   Command *commands() { return &_commands[0]; }
+  long count() { return _count; }
   long line() { return _line + 1; }
   long cycle() { return _cycle; }
   long state() { return _state; }

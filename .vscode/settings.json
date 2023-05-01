@@ -6,7 +6,12 @@
     "algorithm": "cpp",
     "string_view": "cpp",
     "cstdlib": "cpp",
-    "iosfwd": "cpp"
+    "iosfwd": "cpp",
+    "*.tcc": "cpp",
+    "unordered_map": "cpp",
+    "istream": "cpp",
+    "numeric": "cpp",
+    "ostream": "cpp"
   },
   "C_Cpp.errorSquiggles": "enabled"
 }

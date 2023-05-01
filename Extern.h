@@ -8,6 +8,7 @@
 #include "ESP8266EventSource.h"
 #include <AccelStepper.h>
 #include <ArduinoJson.h>
+#include <LittleFS.h>
 
 #include "Gyro.h"
 #include "Program.h"

@@ -37,9 +37,21 @@ void badRequest()
   Serial.println(400);
 }
 
+void notFound()
+{
+  webServer.send(404, "text/plain", "404 Not Found");
+  Serial.println(404);
+}
+
 void methodNotAllowed(String allow)
 {
   webServer.sendHeader("Allow", allow);
   webServer.send(405, "text/plain", "405 Method Not Allowed");
   Serial.println(405);
+}
+
+void internalServerError()
+{
+  webServer.send(500, "text/plain", "500 Internal Server Error");
+  Serial.println(500);
 }

@@ -1,7 +1,7 @@
 #include "Program.h"
 
 Program::Program(AccelStepper *stepper)
-    : _stepper(stepper), _count(0), _line(0), _cycle(0), _state(PROGRAM_NONE), _timer(0)
+    : _stepper(stepper), _count(0), _line(0), _cycle(0), _state(PROGRAM_NONE), _timer(0), _pause(false)
 {
 }
 
@@ -86,7 +86,7 @@ bool Program::execute()
 
   timeIsOwer = (_timer != 0) && (millis() > _timer);
 
-  if (_stepper->isRunning() && !timeIsOwer)
+  if ((_stepper->isRunning() || _pause) && !timeIsOwer)
     return true;
 
   // сбрасываем сработавший таймер - он запускается только для одной команды
@@ -95,6 +95,7 @@ bool Program::execute()
   {
     Serial.println("Program: Timeout");
     _timer = 0;
+    _pause = false;
   }
 
   // если это последняя команда - конец программы
@@ -127,19 +128,9 @@ bool Program::execute()
         _stepper->setMaxSpeed(command->value);
         break;
 
-      case 't':
-        switch (command->name[2])
-        {
-        case 'o': // stop
-        {
-          int force = (int)command->value;
-          force ? _stepper->setCurrentPosition(_stepper->currentPosition()) : _stepper->stop();
-        }
-
-        case 'e': // step
-          _stepper->move((long)command->value);
-          return true;
-        }
+      case 't': // stop
+        int force = (int)command->value;
+        force ? _stepper->setCurrentPosition(_stepper->currentPosition()) : _stepper->stop();
         break;
       }
       break;
@@ -148,15 +139,11 @@ bool Program::execute()
       _stepper->setAcceleration(command->value);
       break;
 
-    case 'm': // move
-      _stepper->move((long)command->value);
-      return true;
-
     case 'r':
       switch (command->name[1])
       {
       case 'o': // rotate
-        _stepper->move((long)(2048 / command->value));
+        _stepper->move(command->value);
         return true;
 
       case 'e':
@@ -178,6 +165,11 @@ bool Program::execute()
     case 't': // timer
       _timer = millis() + (unsigned long)command->value;
       break;
+
+    case 'p': // pause
+      _pause = true;
+      _timer = millis() + (unsigned long)command->value;
+      return true;
     }
   }
 
