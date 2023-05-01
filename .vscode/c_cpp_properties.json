@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "D:\\Distrib.arduino\\arduino-1.8.19\\libraries\\**",
+                "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\packages\\**",
+                "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\sketchbook\\libraries\\**",
+                "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\packages\\esp8266\\hardware\\esp8266\\3.0.2\\**",
+                "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\packages\\esp8266\\tools\\**"
+            ],
+            "forcedInclude": [],
+            "intelliSenseMode": "msvc-x64"
+        }
+    ],
+    "version": 4
+}
