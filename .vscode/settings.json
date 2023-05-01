@@ -5,7 +5,8 @@
     "bitset": "cpp",
     "algorithm": "cpp",
     "string_view": "cpp",
-    "cstdlib": "cpp"
+    "cstdlib": "cpp",
+    "iosfwd": "cpp"
   },
-  "C_Cpp.errorSquiggles": "disabled"
+  "C_Cpp.errorSquiggles": "enabled"
 }

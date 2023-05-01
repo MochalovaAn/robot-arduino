@@ -1,6 +1,6 @@
-set speed 1000
-set acceleration 500
-set timer 1000
+speed 1000
+acceleration 500
+timer 1000
 rotate 360
 set speed 500
 set timer 250

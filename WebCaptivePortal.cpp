@@ -1,6 +1,8 @@
+#include "Web.h"
+
 bool handleCaptivePortal()
 {
-  logRequest();
+  logRequest(false);
 
   if (webServer.hostHeader() != WiFi.softAPIP().toString())
   {

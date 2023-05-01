@@ -2,24 +2,6 @@
     "version": 4,
     "configurations": [
         {
-            "name": "Win32",
-            "compilerPath": "",
-            "compilerArgs": [],
-            "intelliSenseMode": "clang-x64",
-            "includePath": [
-                "${workspaceRoot}",
-                "D:\\Distrib.arduino\\arduino-1.8.19\\libraries\\**",
-                "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\packages\\**",
-                "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\sketchbook\\libraries\\**",
-                "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\packages\\esp8266\\hardware\\esp8266\\3.0.2\\**",
-                "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\packages\\esp8266\\tools\\**"
-            ],
-            "forcedInclude": [],
-            "cStandard": "c11",
-            "cppStandard": "c++17",
-            "defines": []
-        },
-        {
             "name": "Arduino",
             "compilerPath": "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\3.0.4-gcc10.3-1757bed\\bin\\xtensa-lx106-elf-g++",
             "compilerArgs": [
@@ -48,6 +30,7 @@
                 "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\packages\\esp8266\\hardware\\esp8266\\3.0.2\\libraries\\Wire",
                 "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\sketchbook\\libraries\\MPU6050\\src",
                 "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\sketchbook\\libraries\\Madgwick\\src",
+                "D:\\Distrib.arduino\\arduino-1.8.19\\portable\\sketchbook\\libraries\\ArduinoJson\\src",
                 "d:\\distrib.arduino\\arduino-1.8.19\\portable\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\3.0.4-gcc10.3-1757bed\\xtensa-lx106-elf\\include\\c++\\10.3.0",
                 "d:\\distrib.arduino\\arduino-1.8.19\\portable\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\3.0.4-gcc10.3-1757bed\\xtensa-lx106-elf\\include\\c++\\10.3.0\\xtensa-lx106-elf",
                 "d:\\distrib.arduino\\arduino-1.8.19\\portable\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\3.0.4-gcc10.3-1757bed\\xtensa-lx106-elf\\include\\c++\\10.3.0\\backward",

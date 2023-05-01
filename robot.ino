@@ -1,20 +1,23 @@
+#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
+#include "ESP8266EventSource.h"
 #include <AccelStepper.h>
 
-#include "ESP8266EventSource.h"
-#include "Imu.h"
+#include "Stop.h"
+#include "Gyro.h"
 #include "Program.h"
+#include "Web.h"
 
 // Wi-Fi params
 
 const char *WIFI_SSID = "Robot";
 const char *WIFI_PASSWORD = "1234567890";
 
-IPAddress WIFI_LOCAL_IP(192, 168, 1, 1);
-IPAddress WIFI_GATEWAY(192, 168, 1, 1);
-IPAddress WIFI_NETMASK(255, 255, 255, 0);
+IPAddress WIFI_LOCAL_IP(172, 16, 0, 1);
+IPAddress WIFI_GATEWAY(172, 16, 0, 1);
+IPAddress WIFI_NETMASK(255, 255, 0, 0);
 
 // ULN2003 motor driver pins
 
@@ -27,7 +30,7 @@ DNSServer dnsServer;
 ESP8266WebServer webServer(80);
 ESP8266EventSource events("");
 AccelStepper stepper(AccelStepper::HALF4WIRE, STEPPER_IN1, STEPPER_IN3, STEPPER_IN2, STEPPER_IN4);
-Imu imu;
+Gyro gyro;
 Program program(&stepper);
 
 void setup()
@@ -35,18 +38,18 @@ void setup()
   Serial.begin(115200);
   Serial.println();
 
-  // setup MPU6050
+  // setup MPU-6050
 
-  Serial.println("Starting MPU-6050 IMU...");
+  Serial.println("Starting MPU-6050...");
 
-  if (!imu.init(20))
+  if (!gyro.init(20))
   {
     Serial.println("Error: MPU-6050 not found");
     // stop(1);
   }
 
   Serial.print("Device ID: ");
-  Serial.println(imu.getDeviceID());
+  Serial.println(gyro.getDeviceID());
 
   // setup Wi-Fi access point
 
@@ -57,7 +60,7 @@ void setup()
   if (!WiFi.softAP(WIFI_SSID, WIFI_PASSWORD))
   {
     Serial.println("Error: Failed to start Wi-Fi access point");
-    // stop(2);
+    stop(2);
   }
 
   Serial.print("Wi-Fi SSID: ");
@@ -73,7 +76,7 @@ void setup()
   if (!dnsServer.start(53, "*", WIFI_LOCAL_IP))
   {
     Serial.println("Error: Failed to start DNS server");
-    // stop(3);
+    stop(3);
   }
 
   Serial.print("DNS-server IPv4: ");
@@ -93,29 +96,15 @@ void setup()
 
   webServer.on("/", handleRoot);
   webServer.on("/events", handleEvents);
-  webServer.on("/stepper/acceleration", handleStepperAcceleration);
-  webServer.on("/stepper/current-position", handleStepperCurrentPosition);
-  webServer.on("/stepper/current-speed", handleStepperCurrentSpeed);
-  webServer.on("/stepper/disable", handleStepperDisable);
-  webServer.on("/stepper/distance-to-go", handleStepperDistanceToGo);
-  webServer.on("/stepper/enable", handleStepperEnable);
-  webServer.on("/stepper/is-running", handleStepperIsRunning);
-  webServer.on("/stepper/move", handleStepperMove);
-  webServer.on("/stepper/reset", handleStepperReset);
-  webServer.on("/stepper/speed", handleStepperSpeed);
-  webServer.on("/stepper/steps-per-revolution", handleStepperStepsPerRevolution);
+  webServer.on("/stepper", handleStepper);
+  webServer.on("/stepper/rotate", handleStepperRotate);
   webServer.on("/stepper/stop", handleStepperStop);
-  webServer.on("/stepper/target-position", handleStepperTargetPosition);
-  webServer.on("/imu/roll", handleImuRoll);
-  webServer.on("/imu/pitch", handleImuPitch);
-  webServer.on("/imu/yaw", handleImuYaw);
-  webServer.on("/imu/t", handleImuTemperature);
+  webServer.on("/stepper/reset", handleStepperReset);
+  webServer.on("/gyro", handleGyro);
+  webServer.on("/program", handleProgram);
   webServer.on("/program/text", handleProgramText);
-  webServer.on("/program/start", handleProgramStart);
+  webServer.on("/program/run", handleProgramRun);
   webServer.on("/program/stop", handleProgramStop);
-  webServer.on("/program/state", handleProgramState);
-  webServer.on("/program/line", handleProgramLine);
-  webServer.on("/program/is-running", handleProgramIsRunning);
   webServer.onNotFound(handleNotFound);
   webServer.collectHeaders("Last-Event-ID", "Content-Type");
   webServer.begin();
@@ -131,14 +120,14 @@ void loop()
   dnsServer.processNextRequest();
   webServer.handleClient();
   events.keepAlive();
-  program.run();
+  program.execute();
   stepper.run();
-  imu.getMotion();
+  gyro.getMotion();
 
   unsigned long now = millis();
   if (now > timer + 100)
   {
-    events.send(String(now).c_str(), "test", now);
+    eventsSendStatus(now);
     timer = now;
   }
 }

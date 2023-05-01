@@ -1,3 +1,5 @@
+#include "Web.h";
+
 void handleNotFound()
 {
   if (handleCaptivePortal())

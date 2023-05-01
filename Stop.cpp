@@ -1,4 +1,5 @@
-#define LED_STOP 16 // 2
+#include <Arduino.h>
+#include "Stop.h"
 
 void flash()
 {

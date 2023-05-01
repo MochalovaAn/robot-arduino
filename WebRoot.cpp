@@ -1,3 +1,5 @@
+#include "Web.h"
+
 void handleRoot()
 {
   if (handleCaptivePortal())
@@ -19,13 +21,13 @@ void handleRoot()
       "<body>"
       "<h1>Robot</h1>"
       "<div>Welcome to the Robot Captive Portal</div>"
-      "<small id='test'></small>"
+      "<small id='millis'>Disconnected</small>"
       "<script>"
-      "if (!!window.EventSource) {"
+      "if (window.EventSource) {"
       "var source = new EventSource('/events');"
       "source.addEventListener('open', function(e) { console.log('Robot Events Connected'); }, false);"
-      "source.addEventListener('error', function(e) { if (e.target.readyState != EventSource.OPEN) { console.log('Robot Events Disconnected'); document.getElementById('test').innerHTML = 'Disconnected'; } }, false);"
-      "source.addEventListener('test', function(e) { document.getElementById('test').innerHTML = e.data; }, false);"
+      "source.addEventListener('error', function(e) { if (e.target.readyState != EventSource.OPEN) { console.log('Robot Events Disconnected'); document.getElementById('millis').innerHTML = 'Disconnected'; } }, false);"
+      "source.addEventListener('status', function(e) { document.getElementById('millis').innerHTML = JSON.parse(e.data).millis; }, false);"
       "}"
       "</script>"
       "</body>"

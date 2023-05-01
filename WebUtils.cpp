@@ -1,4 +1,6 @@
-void logRequest()
+#include "Web.h"
+
+void logRequest(bool eol)
 {
   char *httpMethods[] = {"ANY", "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"};
 
@@ -24,6 +26,9 @@ void logRequest()
   }
 
   Serial.print("\" ");
+
+  if (eol)
+    Serial.println();
 }
 
 void badRequest()
