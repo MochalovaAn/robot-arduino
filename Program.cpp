@@ -35,11 +35,14 @@ bool Program::setAsText(const char *text)
       text++;
     }
 
+    // пропускаем пробелы между командой и параметром
     while (*text == ' ' || *text == '\t')
       text++;
 
+    // получаем параметр
     command->value = atof(text);
 
+    // пропускаем все остальное до конца строки
     while (*text != '\r' && *text != '\n' && *text != '\0')
       text++;
     if (*text == '\r')
@@ -143,7 +146,7 @@ bool Program::execute()
       switch (command->name[1])
       {
       case 'o': // rotate
-        _stepper->move(command->value);
+        _stepper->move((long)command->value);
         return true;
 
       case 'e':
@@ -187,6 +190,7 @@ bool Program::run()
   _cycle = 1;
   _line = 0;
   _timer = 0;
+  _pause = false;
 
   Serial.println("Program: Run");
 

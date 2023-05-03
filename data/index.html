@@ -6,11 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Robot</title>
   <link href="bootstrap.min.css" rel="stylesheet" />
+  <script src="popper.min.js"></script>
   <script src="bootstrap.min.js"></script>
   <script src="highcharts.js"></script>
   <script src="highcharts-more.js"></script>
   <script src="exporting.js"></script>
   <script src="export-data.js"></script>
+  <script src="filesaver.min.js"></script>
 </head>
 
 <body>
@@ -82,7 +84,7 @@
         <ul class="nav nav-underline flex-nowrap mb-2 mb-md-0" id="tabs-nav" role="tablist">
           <li class="nav-item" role="presentation">
             <button class="nav-link active" id="control-tab" data-bs-toggle="tab" data-bs-target="#control-tab-pane"
-              type="button" role="tab" aria-controls="control-tab-pane" aria-selected="false">Ручное управление</button>
+              type="button" role="tab" aria-controls="control-tab-pane" aria-selected="false">Шаговый двигатель</button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="program-tab" data-bs-toggle="tab" data-bs-target="#program-tab-pane"
@@ -121,7 +123,7 @@
           </div>
           <div class="col-11 col-sm-8">
             <input type="range" class="form-range" min="-3000" max="3000" value="0" id="speed" list="speed-markers"
-              oninput="speed_value.innerHTML = this.value" onchange="setSpeed(this.value)">
+              oninput="speed_hint.innerHTML = this.value" onchange="setSpeed(this.value)">
             <div class="row form-text">
               <span class="col text-start">Назад</span>
               <span class="col-1 text-center">0</span>
@@ -140,7 +142,7 @@
             </datalist>
           </div>
           <div class="col-1 d-flex justify-content-end">
-            <small class="form-text m-0" id="speed_value">0</small>
+            <small class="form-text m-0" id="speed_hint">0</small>
           </div>
         </div>
 
@@ -150,7 +152,7 @@
           </div>
           <div class="col-11 col-sm-8">
             <input type="range" class="form-range" min="1" max="3000" value="512" id="acceleration"
-              list="acceleration-markers" oninput="acceleration_value.innerHTML = this.value"
+              list="acceleration-markers" oninput="acceleration_hint.innerHTML = this.value"
               onchange="setAcceleration(this.value)">
             <div class="d-flex form-text">
               <div class="col">Медленно</div>
@@ -165,19 +167,20 @@
             </datalist>
           </div>
           <div class="col-1 d-flex justify-content-end">
-            <small class="form-text m-0" id="acceleration_value">512</small>
+            <small class="form-text m-0" id="acceleration_hint">512</small>
           </div>
         </div>
 
         <div class="row mb-3 gy-2">
           <div class="col-sm-4">
-            <button class="w-100 btn btn-primary" id="start_stepper" onclick="startStepper()">Старт</button>
+            <button class="btn btn-primary w-100" id="start_stepper"
+              onclick="startStepper(speed.value, acceleration.value)">Старт</button>
           </div>
           <div class="col-sm-4">
-            <button class="w-100 btn btn-secondary" id="stop_stepper" onclick="stopStepper()">Стоп</button>
+            <button class="btn btn-secondary w-100" id="stop_stepper" onclick="stopStepper()">Стоп</button>
           </div>
           <div class="col-sm-4">
-            <button class="w-100 btn btn-outline-secondary" id="reset_stepper" onclick="resetStepper()">Сброс</button>
+            <button class="btn btn-outline-secondary w-100" id="reset_stepper" onclick="resetStepper()">Сброс</button>
           </div>
         </div>
       </div>
@@ -185,8 +188,8 @@
       <!-- program tab -->
       <div class="tab-pane fade" id="program-tab-pane" role="tabpanel" aria-labelledby="program-tab" tabindex="0">
         <div class="row mb-3">
-          <small class="col-md-5 order-md-last text-body-secondary">
-            <h6 class="mb-3">Справка по программированию шагового двигателя</h6>
+          <small class="col-lg-5 order-lg-last text-body-secondary">
+            <p class="h6 mb-3">Справка по программированию шагового двигателя</p>
             <p>Один оборот двигателя - 2048 шагов.</p>
             <p>Команды управления:</p>
             <ul>
@@ -200,7 +203,7 @@
             </ul>
           </small>
 
-          <div class="col-md-7">
+          <div class="col-lg-7">
             <textarea class="form-control" id="program" rows="11">
 acceleration 500
 speed 1000
@@ -216,17 +219,49 @@ repeat</textarea>
 
         <div class="row mb-3 gy-2">
           <div class="col-sm-4">
-            <button class="w-100 btn btn-primary" id="open_program"
-              onclick="file.value=''; file.click()">Открыть...</button>
+            <div class="dropdown">
+              <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                Файл
+              </button>
+              <ul class="dropdown-menu">
+                <li><button class="dropdown-item" onclick="file.value=''; file.click()">Открыть...</button></li>
+                <li><button class="dropdown-item" onclick="saveTextFile(program.value)">Сохранить...</button></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                <li><button class="dropdown-item"
+                    onclick="downloadProgram().then((text) => program.value = text ?? '')">Считать из робота</button>
+                </li>
+              </ul>
+            </div>
             <input class="d-none" type="file" id="file"
               onchange="readTextFile(this.files[0]).then((text) => (program.value = text)).catch((e) => console.error('Read file error.', e))">
+            <!-- <div class="btn-group w-100">
+              <button type="button" class="w-100 btn btn-outline-primary">Открыть...</button>
+              <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><button class="dropdown-item">Открыть файл...</button></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                <li><button class="dropdown-item">Считать из робота</button></li>
+              </ul>
+            </div> -->
+            <!-- <button class="w-100 btn btn-primary" id="open_program"
+              onclick="file.value=''; file.click()">Из файла...</button>
+            <input class="d-none" type="file" id="file"
+              onchange="readTextFile(this.files[0]).then((text) => (program.value = text)).catch((e) => console.error('Read file error.', e))"> -->
           </div>
           <div class="col-sm-4">
-            <button class="w-100 btn btn-primary" id="run_program"
+            <button class="btn btn-primary w-100" id="run_program"
               onclick="runProgram(program.value)">Выполнить</button>
           </div>
           <div class="col-sm-4">
-            <button class="w-100 btn btn-secondary" id="stop_program" onclick="stopProgram()">Стоп</button>
+            <button class="btn btn-secondary w-100" id="stop_program" onclick="stopProgram()">Стоп</button>
           </div>
         </div>
 

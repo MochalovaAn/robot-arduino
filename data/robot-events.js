@@ -2,6 +2,8 @@ var source = new EventSource("/events");
 
 var robot = { stepper: {}, program: {} };
 var timeOffset = 0;
+var speedCapture = false;
+var accelerationCapture = false;
 
 source.addEventListener(
   "open",
@@ -33,6 +35,19 @@ source.addEventListener(
       timeOffset = Date.now() - data.millis;
     }
 
+    // speed and acceleration values by program
+
+    if (data.program.isRunning) {
+      if (!speedCapture) {
+        speed.value = data.stepper.speed * Math.sign(data.stepper.distanceToGo);
+        speed_hint.innerHTML = speed.value;
+      }
+      if (!accelerationCapture) {
+        acceleration.value = data.stepper.acceleration;
+        acceleration_hint.innerHTML = acceleration.value;
+      }
+    }
+
     // control buttons
 
     if (robot.stepper.isRunning !== data.stepper.isRunning) {
@@ -40,7 +55,7 @@ source.addEventListener(
       stop_stepper.disabled = !data.stepper.isRunning;
     }
 
-    // program buttons
+    // program buttons and bage
 
     if (robot.program.isRunning !== data.program.isRunning) {
       run_program.disabled = data.program.isRunning;
@@ -91,7 +106,7 @@ source.addEventListener(
       if (stepperAngle < -1024) stepperAngle = stepperAngle + 2048;
 
       gyro_chart.series[0].addPoint(
-        [time, 360 * stepperAngle / 2048],
+        [time, (360 * stepperAngle) / 2048],
         true,
         gyro_chart.series[0].points.length >= 300,
         false
@@ -110,3 +125,12 @@ source.addEventListener(
   },
   false
 );
+
+speed.addEventListener("pointerdown", (e) => (speedCapture = true));
+speed.addEventListener("change", (e) => (speedCapture = false));
+
+acceleration.addEventListener(
+  "pointerdown",
+  (e) => (accelerationCapture = true)
+);
+acceleration.addEventListener("change", (e) => (accelerationCapture = false));

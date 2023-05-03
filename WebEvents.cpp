@@ -76,6 +76,8 @@ void eventsSendStatus(unsigned long now)
     doc["program"]["count"] = program.count();
     doc["program"]["cycle"] = program.cycle();
     doc["program"]["isRunning"] = program.isRunning();
+    doc["program"]["timer"] = program.timer();
+    doc["program"]["pause"] = program.pause();
 
     String data;
     serializeJson(doc, data);

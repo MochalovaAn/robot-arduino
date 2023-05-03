@@ -43,6 +43,8 @@ public:
   long line() { return _line + 1; }
   long cycle() { return _cycle; }
   long state() { return _state; }
+  long timer() { return _timer; }
+  long pause() { return _pause; }
   bool isRunning() { return _state == PROGRAM_RUN; }
 };
 

@@ -14,6 +14,8 @@ void handleProgram()
     doc["count"] = program.count();
     doc["cycle"] = program.cycle();
     doc["isRunning"] = program.isRunning();
+    doc["timer"] = program.timer();
+    doc["pause"] = program.pause();
 
     String content;
     serializeJson(doc, content);

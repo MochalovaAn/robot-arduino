@@ -31,10 +31,10 @@ function rotate(speed) {
     .catch((e) => console.error("Start error.", e));
 }
 
-function startStepper() {
-  return setSpeed(speed.value)
-    .then(() => setAcceleration(acceleration.value))
-    .then(() => rotate(speed.value));
+function startStepper(speed, acceleration) {
+  return setSpeed(speed)
+    .then(() => setAcceleration(acceleration))
+    .then(() => rotate(speed));
 }
 
 function stopStepper() {
@@ -50,17 +50,16 @@ function resetStepper() {
 }
 
 function downloadProgram() {
-  return fetch(`/program/text`, { method: "GET" })
-    .then((response) => response.text())
-    .then((text) => {
+  return fetch("/program/text", { method: "GET" })
+    .then((response) => {
       console.log("Download program:", response.status);
-      return text;
+      return response.text();
     })
     .catch((e) => console.error("Download program error.", e));
 }
 
 function uploadProgram(text) {
-  return fetch(`/program/text`, {
+  return fetch("/program/text", {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
     body: text,
@@ -93,4 +92,9 @@ function readTextFile(file) {
       reader.readAsText(file);
     }
   });
+}
+
+function saveTextFile(text) {
+  var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  saveAs(blob, "program.txt");
 }
