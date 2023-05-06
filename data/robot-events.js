@@ -1,6 +1,6 @@
 var source = new EventSource("/events");
 
-var robot = { stepper: {}, program: {} };
+var prevData = { stepper: {}, program: {} };
 var timeOffset = 0;
 var speedCapture = false;
 var accelerationCapture = false;
@@ -30,34 +30,43 @@ source.addEventListener(
   "status",
   (e) => {
     const data = JSON.parse(e.data);
+    let firstEvent = false;
 
     if (timeOffset === 0) {
       timeOffset = Date.now() - data.millis;
+      firstEvent = true;
     }
 
     // speed and acceleration values by program
 
-    if (data.program.isRunning) {
-      if (!speedCapture) {
-        speed.value = data.stepper.speed * Math.sign(data.stepper.distanceToGo);
-        speed_hint.innerHTML = speed.value;
+    const stepperSpeed = data.stepper.speed * Math.sign(data.stepper.distanceToGo || prevData.stepper.distanceToGo);
+    const stepperAcceleration = data.stepper.acceleration;
+
+    if (prevData.program.isRunning || firstEvent) {
+      if (data.stepper.isRunning && !power.checked) power.checked = true;
+
+      if (!speedCapture && stepperSpeed !== speed.value) {
+        speed.value = stepperSpeed;
+        speed_hint.innerHTML = stepperSpeed;
       }
-      if (!accelerationCapture) {
-        acceleration.value = data.stepper.acceleration;
-        acceleration_hint.innerHTML = acceleration.value;
+      if (!accelerationCapture && stepperAcceleration != acceleration.value) {
+        acceleration.value = stepperAcceleration;
+        acceleration_hint.innerHTML = stepperAcceleration;
       }
     }
 
     // control buttons
 
-    if (robot.stepper.isRunning !== data.stepper.isRunning) {
+    if (prevData.stepper.isRunning !== data.stepper.isRunning) {
+      if (data.stepper.isRunning) power.checked = true;
+
       start_stepper.disabled = data.stepper.isRunning;
       stop_stepper.disabled = !data.stepper.isRunning;
     }
 
     // program buttons and bage
 
-    if (robot.program.isRunning !== data.program.isRunning) {
+    if (prevData.program.isRunning !== data.program.isRunning) {
       run_program.disabled = data.program.isRunning;
       stop_program.disabled = !data.program.isRunning;
 
@@ -72,56 +81,28 @@ source.addEventListener(
 
     // charts
 
-    if (data.stepper.isRunning || robot.stepper.isRunning) {
+    if (data.stepper.isRunning || prevData.stepper.isRunning) {
       const time = data.millis + timeOffset;
 
-      speed_chart.series[0].addPoint(
-        [time, data.stepper.speed * Math.sign(data.stepper.distanceToGo)],
-        true,
-        speed_chart.series[0].points.length >= 300,
-        false
-      );
-      speed_chart.series[1].addPoint(
-        [time, data.stepper.currentSpeed],
-        true,
-        speed_chart.series[1].points.length >= 300,
-        false
-      );
+      appendChart(speed_chart, 0, time, stepperSpeed);
+      appendChart(speed_chart, 1, time, data.stepper.currentSpeed);
 
-      acceleration_chart.series[0].addPoint(
-        [time, data.stepper.acceleration],
-        true,
-        acceleration_chart.series[0].points.length >= 300,
-        false
-      );
-      acceleration_chart.series[1].addPoint(
-        [time, data.gyro.ay],
-        true,
-        acceleration_chart.series[1].points.length >= 300,
-        false
-      );
+      appendChart(acceleration_chart, 0, time, (100 * Math.abs(data.gyro.ax)) / 2);
+      appendChart(acceleration_chart, 1, time, (100 * Math.abs(data.gyro.ay)) / 2);
+      appendChart(acceleration_chart, 2, time, (100 * Math.abs(data.gyro.az)) / 2);
+      appendChart(acceleration_chart, 3, time, (100 * stepperAcceleration) / 2048);
 
-      stepperAngle = data.stepper.currentPosition % 2048;
-      if (stepperAngle > 1024) stepperAngle = stepperAngle - 2048;
-      if (stepperAngle < -1024) stepperAngle = stepperAngle + 2048;
+      const stepperPosition = data.stepper.currentPosition % data.stepper.stepsPerRevolution;
 
-      gyro_chart.series[0].addPoint(
-        [time, (360 * stepperAngle) / 2048],
-        true,
-        gyro_chart.series[0].points.length >= 300,
-        false
-      );
-      gyro_chart.series[1].addPoint(
-        [time, data.gyro.yaw],
-        true,
-        gyro_chart.series[1].points.length >= 300,
-        false
-      );
+      appendChart(gyro_chart, 0, time, data.gyro.roll);
+      appendChart(gyro_chart, 1, time, data.gyro.pitch);
+      appendChart(gyro_chart, 2, time, data.gyro.yaw);
+      appendChart(gyro_chart, 3, time, (360 * stepperPosition) / data.stepper.stepsPerRevolution);
     }
 
     millis.innerHTML = `${data.millis} - ${data.clients}/10`;
 
-    robot = data;
+    prevData = data;
   },
   false
 );
@@ -129,8 +110,5 @@ source.addEventListener(
 speed.addEventListener("pointerdown", (e) => (speedCapture = true));
 speed.addEventListener("change", (e) => (speedCapture = false));
 
-acceleration.addEventListener(
-  "pointerdown",
-  (e) => (accelerationCapture = true)
-);
+acceleration.addEventListener("pointerdown", (e) => (accelerationCapture = true));
 acceleration.addEventListener("change", (e) => (accelerationCapture = false));

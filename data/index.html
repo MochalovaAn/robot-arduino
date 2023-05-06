@@ -17,9 +17,8 @@
 
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-    <symbol id="android2" viewBox="0 0 16 16">
-      <path
-        d="m10.213 1.471.691-1.26c.046-.083.03-.147-.048-.192-.085-.038-.15-.019-.195.058l-.7 1.27A4.832 4.832 0 0 0 8.005.941c-.688 0-1.34.135-1.956.404l-.7-1.27C5.303 0 5.239-.018 5.154.02c-.078.046-.094.11-.049.193l.691 1.259a4.25 4.25 0 0 0-1.673 1.476A3.697 3.697 0 0 0 3.5 5.02h9c0-.75-.208-1.44-.623-2.072a4.266 4.266 0 0 0-1.664-1.476ZM6.22 3.303a.367.367 0 0 1-.267.11.35.35 0 0 1-.263-.11.366.366 0 0 1-.107-.264.37.37 0 0 1 .107-.265.351.351 0 0 1 .263-.11c.103 0 .193.037.267.11a.36.36 0 0 1 .112.265.36.36 0 0 1-.112.264Zm4.101 0a.351.351 0 0 1-.262.11.366.366 0 0 1-.268-.11.358.358 0 0 1-.112-.264c0-.103.037-.191.112-.265a.367.367 0 0 1 .268-.11c.104 0 .19.037.262.11a.367.367 0 0 1 .107.265c0 .102-.035.19-.107.264ZM3.5 11.77c0 .294.104.544.311.75.208.204.46.307.76.307h.758l.01 2.182c0 .276.097.51.292.703a.961.961 0 0 0 .7.288.973.973 0 0 0 .71-.288.95.95 0 0 0 .292-.703v-2.182h1.343v2.182c0 .276.097.51.292.703a.972.972 0 0 0 .71.288.973.973 0 0 0 .71-.288.95.95 0 0 0 .292-.703v-2.182h.76c.291 0 .54-.103.749-.308.207-.205.311-.455.311-.75V5.365h-9v6.404Zm10.495-6.587a.983.983 0 0 0-.702.278.91.91 0 0 0-.293.685v4.063c0 .271.098.501.293.69a.97.97 0 0 0 .702.284c.28 0 .517-.095.712-.284a.924.924 0 0 0 .293-.69V6.146a.91.91 0 0 0-.293-.685.995.995 0 0 0-.712-.278Zm-12.702.283a.985.985 0 0 1 .712-.283c.273 0 .507.094.702.283a.913.913 0 0 1 .293.68v4.063a.932.932 0 0 1-.288.69.97.97 0 0 1-.707.284.986.986 0 0 1-.712-.284.924.924 0 0 1-.293-.69V6.146c0-.264.098-.491.293-.68Z" />
+    <symbol id="record-circle-fill" viewBox="0 0 16 16">
+      <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-8 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
     </symbol>
     <symbol id="exclamation" viewBox="0 0 16 16">
       <path
@@ -34,7 +33,7 @@
       <div class="d-flex align-items-center mb-3 mb-xl-0 me-xl-auto">
         <div class="d-flex align-items-center my-2 my-lg-0 me-lg-auto link-body-emphasis text-decoration-none">
           <svg class="bi me-2" width="40" height="32" role="img" aria-label="Robot">
-            <use xlink:href="#android2"></use>
+            <use xlink:href="#record-circle-fill"></use>
           </svg>
           <span class="fs-4">Robot</span>
         </div>
@@ -109,10 +108,10 @@
           </div>
           <div class="col-sm-8">
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="power" checked
+              <input class="form-check-input" type="checkbox" role="switch" id="power"
                 style="width: 3rem; height: 1.5rem;" oninput="power_value.innerHTML = this.checked ? 'Вкл' : 'Выкл'"
                 onchange="this.checked ? powerOn() : powerOff()">
-              <small id="power_value" class="form-text ms-3">Вкл</small>
+              <small id="power_value" class="form-text ms-3">Выкл</small>
             </div>
           </div>
         </div>
@@ -122,7 +121,7 @@
             <label for="speed" class="form-label">Скорость вращения, шагов/с</label>
           </div>
           <div class="col-11 col-sm-8">
-            <input type="range" class="form-range" min="-3000" max="3000" value="0" id="speed" list="speed-markers"
+            <input type="range" class="form-range" min="-2048" max="2048" value="0" id="speed" list="speed-markers"
               oninput="speed_hint.innerHTML = this.value" onchange="setSpeed(this.value)">
             <div class="row form-text">
               <span class="col text-start">Назад</span>
@@ -130,15 +129,15 @@
               <span class="col text-end">Вперед</span>
             </div>
             <datalist id="speed-markers">
-              <option value="-3000"></option>
               <option value="-2048"></option>
               <option value="-1024"></option>
               <option value="-512"></option>
+              <option value="-256"></option>
               <option value="0"></option>
+              <option value="256"></option>
               <option value="512"></option>
               <option value="1024"></option>
               <option value="2048"></option>
-              <option value="3000"></option>
             </datalist>
           </div>
           <div class="col-1 d-flex justify-content-end">
@@ -151,7 +150,7 @@
             <label for="acceleration" class="form-label">Ускорение, шагов/с<sup>2</sup></label>
           </div>
           <div class="col-11 col-sm-8">
-            <input type="range" class="form-range" min="1" max="3000" value="512" id="acceleration"
+            <input type="range" class="form-range" min="1" max="2048" value="1" id="acceleration"
               list="acceleration-markers" oninput="acceleration_hint.innerHTML = this.value"
               onchange="setAcceleration(this.value)">
             <div class="d-flex form-text">
@@ -160,14 +159,14 @@
             </div>
             <datalist id="acceleration-markers">
               <option value="0"></option>
+              <option value="256"></option>
               <option value="512"></option>
               <option value="1024"></option>
               <option value="2048"></option>
-              <option value="3000"></option>
             </datalist>
           </div>
           <div class="col-1 d-flex justify-content-end">
-            <small class="form-text m-0" id="acceleration_hint">512</small>
+            <small class="form-text m-0" id="acceleration_hint">1</small>
           </div>
         </div>
 
@@ -177,7 +176,7 @@
               onclick="startStepper(speed.value, acceleration.value)">Старт</button>
           </div>
           <div class="col-sm-4">
-            <button class="btn btn-secondary w-100" id="stop_stepper" onclick="stopStepper()">Стоп</button>
+            <button class="btn btn-secondary w-100" id="stop_stepper" onclick="stopStepper(0)">Стоп</button>
           </div>
           <div class="col-sm-4">
             <button class="btn btn-outline-secondary w-100" id="reset_stepper" onclick="resetStepper()">Сброс</button>
@@ -190,7 +189,7 @@
         <div class="row mb-3">
           <small class="col-lg-5 order-lg-last text-body-secondary">
             <p class="h6 mb-3">Справка по программированию шагового двигателя</p>
-            <p>Один оборот двигателя - 2048 шагов.</p>
+            <p>Один оборот двигателя - 4096 шагов. Один шаг двигателя - 0.088º</p>
             <p>Команды управления:</p>
             <ul>
               <li><strong>speed n</strong> - Установить скорость вращения в n шагов/с.</li>
@@ -207,7 +206,7 @@
             <textarea class="form-control" id="program" rows="11">
 acceleration 500
 speed 1000
-rotate 2048
+rotate 4096
 pause 3000
 speed 500
 timer 250
@@ -237,24 +236,6 @@ repeat</textarea>
             </div>
             <input class="d-none" type="file" id="file"
               onchange="readTextFile(this.files[0]).then((text) => (program.value = text)).catch((e) => console.error('Read file error.', e))">
-            <!-- <div class="btn-group w-100">
-              <button type="button" class="w-100 btn btn-outline-primary">Открыть...</button>
-              <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <span class="visually-hidden">Toggle Dropdown</span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><button class="dropdown-item">Открыть файл...</button></li>
-                <li>
-                  <hr class="dropdown-divider">
-                </li>
-                <li><button class="dropdown-item">Считать из робота</button></li>
-              </ul>
-            </div> -->
-            <!-- <button class="w-100 btn btn-primary" id="open_program"
-              onclick="file.value=''; file.click()">Из файла...</button>
-            <input class="d-none" type="file" id="file"
-              onchange="readTextFile(this.files[0]).then((text) => (program.value = text)).catch((e) => console.error('Read file error.', e))"> -->
           </div>
           <div class="col-sm-4">
             <button class="btn btn-primary w-100" id="run_program"

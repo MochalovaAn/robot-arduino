@@ -16,7 +16,7 @@ void handleStepper()
     doc["targetPosition"] = stepper.targetPosition();
     doc["distanceToGo"] = stepper.distanceToGo();
     doc["isRunning"] = stepper.isRunning();
-    doc["stepsPerRevolution"] = 2048;
+    doc["stepsPerRevolution"] = stepper.stepsPerRevolution();
 
     String content;
     serializeJson(doc, content);

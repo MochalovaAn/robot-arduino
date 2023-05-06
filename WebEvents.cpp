@@ -57,7 +57,7 @@ void eventsSendStatus(unsigned long now)
     doc["stepper"]["targetPosition"] = stepper.targetPosition();
     doc["stepper"]["distanceToGo"] = stepper.distanceToGo();
     doc["stepper"]["isRunning"] = stepper.isRunning();
-    doc["stepper"]["stepsPerRevolution"] = 2048;
+    doc["stepper"]["stepsPerRevolution"] = stepper.stepsPerRevolution();
 
     doc["gyro"]["deviceID"] = gyro.getDeviceID();
     doc["gyro"]["roll"] = gyro.roll;

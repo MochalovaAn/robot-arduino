@@ -3,15 +3,16 @@
 
 #include <AccelStepper.h>
 
-#define COMMAND_MAX 1024
+#define COMMAND_MAX 4096
+#define NAME_MAX 4
 
-#define PROGRAM_NONE 0
+#define PROGRAM_NOTEXT 0
 #define PROGRAM_STOP 1
 #define PROGRAM_RUN 2
 
 typedef struct command_t
 {
-  char name[16];
+  char name[NAME_MAX];
   float value;
 } Command;
 

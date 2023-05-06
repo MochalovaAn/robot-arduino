@@ -1,7 +1,7 @@
 #include "Program.h"
 
 Program::Program(AccelStepper *stepper)
-    : _stepper(stepper), _count(0), _line(0), _cycle(0), _state(PROGRAM_NONE), _timer(0), _pause(false)
+    : _stepper(stepper), _count(0), _line(0), _cycle(0), _state(PROGRAM_NOTEXT), _timer(0), _pause(false)
 {
 }
 
@@ -27,11 +27,12 @@ bool Program::setAsText(const char *text)
     while (*text == ' ' || *text == '\t')
       text++;
 
-    // выделяем команду до пробела/конца строки
+    // выделяем команду до пробела/конца строки, из команды берем только первые 3 символа
     i = 0;
-    while (i < 16 && *text != ' ' && *text != '\t' && *text != '\r' && *text != '\n' && *text != '\0')
+    while (*text != ' ' && *text != '\t' && *text != '\r' && *text != '\n' && *text != '\0')
     {
-      command->name[i++] = *text;
+      if (i < NAME_MAX - 1)
+        command->name[i++] = *text;
       text++;
     }
 
@@ -51,7 +52,7 @@ bool Program::setAsText(const char *text)
       text++;
   }
 
-  _state = _count ? PROGRAM_STOP : PROGRAM_NONE;
+  _state = _count ? PROGRAM_STOP : PROGRAM_NOTEXT;
 
   Serial.printf("Program: Text changed, lines %d\n", _count);
 
@@ -79,6 +80,7 @@ bool Program::execute()
 {
   bool timeIsOwer;
   Command *command;
+  size_t watchdog = 0;
 
   // если программа не запущена - выход
 
@@ -115,7 +117,7 @@ bool Program::execute()
   // пребираем команды, пока одна из них не запустит двигатель, конец программы
   // будет обработан следующим вызовом run()
 
-  while (_line < _count)
+  while (_line < _count && watchdog++ < 100)
   {
     command = &_commands[_line];
     _line++;

@@ -1,6 +1,10 @@
 # Робот
 
-Прошивка Arduino для управления цилиндрическим роботом с маятниковым управлением.
+Прошивка <a href="https://www.arduino.cc" target="_blank">Arduino</a> для управления цилиндрическим роботом с маятниковым управлением. Выпускная квалификационная работа магистра.
+
+Мочалова Анастасия  
+3821М1ПМкн ИТММ ННГУ  
+<a href="mailto: anastasia.mochalova@google.com">anastasia.mochalova@google.com</a>
 
 ## Содержание
 
@@ -19,13 +23,11 @@
 
 Для управления и программирования робота может использоваться мобильный телефон или ноутбук.
 
-После подключения к WiFi точке доступа робота автоматически откроется Web-страница управления. Если страница управления не открылась автоматически, запустите браузер и в адресной строке введите <a href="http://172.16.0.1" target="_blank">http://172.16.0.1</a>.
-
-Если страница загрузилась не полностью или вверху страницы выводится надпись `Связь с роботом потеряна`, то попробуйте перезагрузить страницу.
+После подключения к WiFi точке доступа робота автоматически откроется Web-страница управления. Если страница управления не открылась автоматически, запустите браузер и в адресной строке введите <a href="http://172.16.0.1" target="_blank">http://172.16.0.1</a>. Если страница загрузилась не полностью или вверху страницы выводится надпись `Связь с роботом потеряна`, то попробуйте перезагрузить страницу.
 
 ## Программирование движения
 
-Чтобы робот начал движение, надо со Web-станицы управления или с помощью `HTTP API` загрузить в него `программу` и запустить ее на исполнение.
+Чтобы робот начал движение, надо со Web-станицы управления или с помощью [HTTP API](#http-api) загрузить в него `программу` и запустить ее на исполнение.
 
 ### Программа
 
@@ -40,7 +42,7 @@
 ```text
 acceleration 500
 speed 1000
-rotate 2048
+rotate 4096
 pause 5000
 speed 500
 timer 250
@@ -68,6 +70,10 @@ repeat
 - `repeat` - Повторить программу с начала. Параметр отсутствует. Используется для зацикливания исполнения программы.
 
 ## HTTP API
+
+Адрес сервера `HTTP-API`:
+
+- `http://172.16.0.1:80`
 
 Для получения параметров робота используется HTTP запрос `GET`.
 
@@ -117,7 +123,7 @@ repeat
 
 - `isRunning` - Вращается ли двигатель.
 
-- `stepsPerRevolution` - Количество шагов двигателя на один оборот. Значение по умолчанию `2048`.
+- `stepsPerRevolution` - Количество шагов двигателя на один оборот. Значение по умолчанию `4096`.
 
 Пример запроса (Python):
 
@@ -142,7 +148,7 @@ print(stepper_data)
   "targetPosition": 0,
   "distanceToGo": 0,
   "isRunning": false,
-  "stepsPerRevolution": 2048
+  "stepsPerRevolution": 4096
 }
 ```
 
@@ -182,7 +188,7 @@ print(response.status_code, response.reason)
 ```python
 import requests
 
-response = requests.post("http://172.16.0.1/stepper/rotate?steps=2048")
+response = requests.post("http://172.16.0.1/stepper/rotate?steps=4096")
 print(response.status_code, response.reason)
 ```
 
@@ -352,7 +358,7 @@ print(program_data)
 
 Получить текущую программу.
 
-Возвращает текст текущей программы в теле ответа в формате `text/plain`.
+Возвращает текст текущей программы в теле ответа в формате `text/plain` в кодировке `utf-8`.
 
 Пример запроса (Python):
 
@@ -371,9 +377,9 @@ print(program_text)
 ```
 acceleration 500
 speed 1000
-rotate 2048
+rotate 4096
 speed 500
-rotate -2048
+rotate -4096
 repeat
 ```
 
@@ -385,14 +391,14 @@ repeat
 
 - `text` - текст новой программы.
 
-Текст программы также может быть указан в теле запроса в формате `text/plain`.
+Текст программы также может быть указан в теле запроса в формате `text/plain` в кодировке `utf-8`.
 
 Пример запроса 1 (Python):
 
 ```python
 import requests
 
-program_text = "acceleration 500\r\nspeed 1000\r\nrotate 2048\r\n"
+program_text = "acceleration 500\r\nspeed 1000\r\nrotate 4096\r\n"
 
 response = requests.post("http://172.16.0.1/program/text?text=" + program_text)
 print(response.status_code, response.reason)
@@ -404,7 +410,7 @@ print(response.status_code, response.reason)
 import requests
 
 headers = { 'Content-Type': 'text/plain' }
-program_text = "acceleration 500\r\nspeed 1000\r\nrotate 2048\r\n"
+program_text = "acceleration 500\r\nspeed 1000\r\nrotate 4096\r\n"
 
 response = requests.post("http://172.16.0.1/program/text", headers=headers, data=program_text)
 print(response.status_code, response.reason)
@@ -458,7 +464,7 @@ URL событий:
 
 Данные события - объект JSON:
 
-- `millis` - Счетчик миллисекунд с момента включения робота.
+- `millis` - Количество миллисекунд с момента включения робота.
 - `clients` - Количество подключенных к роботу WiFi клиентов.
 - `stepper` - Текущие параметры и состояние шагового двигателя.
 - `gyro` - Текущие параметры гироскопа.
@@ -490,7 +496,7 @@ source.addEventListener(
     "targetPosition": 0,
     "distanceToGo": 0,
     "isRunning": false,
-    "stepsPerRevolution": 2048
+    "stepsPerRevolution": 4096
   },
   "gyro": {
     "deviceID": 0,

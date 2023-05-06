@@ -5,7 +5,8 @@ function powerOn() {
 }
 
 function powerOff() {
-  return fetch("/stepper/disable", { method: "POST" })
+  return stopStepper(1)
+    .then(() => fetch("/stepper/disable", { method: "POST" }))
     .then((response) => console.log("Power off:", response.status))
     .catch((e) => console.error("Power off error:", e));
 }
@@ -13,7 +14,7 @@ function powerOff() {
 function setSpeed(value) {
   return fetch(`/stepper?speed=${Math.abs(value)}`, { method: "POST" })
     .then((response) => console.log("Set speed:", response.status))
-    .then(() => (robot.stepper.isRunning ? rotate(value) : undefined))
+    .then(() => (prevData.stepper.isRunning ? rotate(value) : undefined))
     .catch((e) => console.error("Set speed error.", e));
 }
 
@@ -32,13 +33,14 @@ function rotate(speed) {
 }
 
 function startStepper(speed, acceleration) {
-  return setSpeed(speed)
+  return powerOn()
+    .then(() => setSpeed(speed))
     .then(() => setAcceleration(acceleration))
     .then(() => rotate(speed));
 }
 
-function stopStepper() {
-  return fetch("/stepper/stop", { method: "POST" })
+function stopStepper(force) {
+  return fetch(`/stepper/stop?force=${force}`, { method: "POST" })
     .then((response) => console.log("Stop:", response.status))
     .catch((e) => console.error("Stop:", e));
 }
@@ -46,6 +48,7 @@ function stopStepper() {
 function resetStepper() {
   return fetch("/stepper/reset", { method: "POST" })
     .then((response) => console.log("Reset:", response.status))
+    .then(() => setTimeout(() => clearCharts(), 100))
     .catch((e) => console.error("Reset error.", e));
 }
 

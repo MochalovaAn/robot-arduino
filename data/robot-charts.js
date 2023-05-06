@@ -1,5 +1,3 @@
-const colors = Highcharts.getOptions().colors;
-
 function createChart(renderTo, title, min, max, series) {
   return Highcharts.chart(renderTo, {
     chart: {
@@ -35,15 +33,7 @@ function createChart(renderTo, title, min, max, series) {
       enabled: true,
       buttons: {
         contextButton: {
-          menuItems: [
-            "viewFullscreen",
-            "viewData",
-            "separator",
-            "printChart",
-            "separator",
-            "downloadCSV",
-            "downloadXLS",
-          ],
+          menuItems: ["viewFullscreen", "viewData", "printChart", "downloadCSV", "downloadXLS"],
         },
       },
       csv: {
@@ -61,29 +51,39 @@ function createChart(renderTo, title, min, max, series) {
   });
 }
 
-var speed_chart = createChart(
-  "speed-chart",
-  "Скорость вращения двигателя",
-  -3000,
-  3000,
-  [
-    { name: "Максимальная", color: colors[2] },
-    { name: "Текущая", color: colors[0] },
-  ]
-);
+function appendChart(chart, index, x, y) {
+  const series = chart.series[index];
+  series.addPoint([x, y], true, series.points.length >= 300, false); // <- 300 = ~30 сек
+}
 
-var acceleration_chart = createChart(
-  "acceleration-chart",
-  "Ускорение",
-  0,
-  3000,
-  [
-    { name: "Двигатель", color: colors[0] },
-    { name: "Гироскоп", color: colors[3] },
-  ]
-);
+function clearChart(chart) {
+  chart.series.forEach(x => x.setData([], false));
+  chart.redraw();
+}
 
-var gyro_chart = createChart("gyro-chart", "Угол поворота", -180, 180, [
-  { name: "Двигатель", color: colors[0] },
-  { name: "Гироскоп", color: colors[5] },
+const colors = Highcharts.getOptions().colors;
+
+var speed_chart = createChart("speed-chart", "Скорость вращения двигателя", -2000, 2000, [
+  { name: "Заданная", color: colors[2] },
+  { name: "Текущая", color: colors[0] },
 ]);
+
+var acceleration_chart = createChart("acceleration-chart", "Ускорение", 0, 100, [
+  { name: "Гироскоп X", color: colors[2], visible: false },
+  { name: "Гироскоп Y", color: colors[3], visible: false },
+  { name: "Гироскоп Z", color: colors[4] },
+  { name: "Двигатель", color: colors[0] },
+]);
+
+var gyro_chart = createChart("gyro-chart", "Угол поворота", 0, 360, [
+  { name: "Крен (X)", color1: colors[2], visible: false },
+  { name: "Тангаж (Y)", color1: colors[3], visible: false },
+  { name: "Рыскание (Z)", color1: colors[4] },
+  { name: "Двигатель", color1: colors[0] },
+]);
+
+function clearCharts() {
+  clearChart(speed_chart);
+  clearChart(acceleration_chart);
+  clearChart(gyro_chart);
+}

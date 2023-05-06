@@ -3,11 +3,11 @@
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include "ESP8266EventSource.h"
-#include <AccelStepper.h>
 #include <LittleFS.h>
 
 #include "Stop.h"
 #include "Gyro.h"
+#include "Stepper.h"
 #include "Program.h"
 #include "Web.h"
 
@@ -20,21 +20,14 @@ IPAddress WIFI_LOCAL_IP(172, 16, 0, 1);
 IPAddress WIFI_GATEWAY(172, 16, 0, 1);
 IPAddress WIFI_NETMASK(255, 255, 0, 0);
 
-// ULN2003 motor driver pins
+// Events send period
 
-#define STEPPER_IN1 0  // D3
-#define STEPPER_IN2 2  // D4
-#define STEPPER_IN3 14 // D5
-#define STEPPER_IN4 12 // D6
-
-// Gyro update period
-
-#define GYRO_PERIOD 100 
+#define EVENTS_PERIOD 100 
 
 DNSServer dnsServer;
 ESP8266WebServer webServer(80);
 ESP8266EventSource events("");
-AccelStepper stepper(AccelStepper::HALF4WIRE, STEPPER_IN1, STEPPER_IN3, STEPPER_IN2, STEPPER_IN4);
+Stepper stepper;
 Gyro gyro;
 Program program(&stepper);
 
@@ -64,7 +57,7 @@ void setup()
 
   Serial.println("Starting MPU-6050...");
 
-  if (!gyro.init(GYRO_PERIOD))
+  if (!gyro.init(EVENTS_PERIOD))
   {
     Serial.println("Error: MPU-6050 not found");
     // stop(2);
@@ -150,7 +143,7 @@ void loop()
   gyro.getMotion();
 
   unsigned long now = millis();
-  if (now > timer + GYRO_PERIOD)
+  if (now > timer + EVENTS_PERIOD)
   {
     eventsSendStatus(now);
     timer = now;
