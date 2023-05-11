@@ -10,11 +10,11 @@
 #define STEPPER_IN3 14 // D5
 #define STEPPER_IN4 12 // D6
 
-#define STEPPER_INTERFACE AccelStepper::HALF4WIRE // полушаговый, 4 проводной
-#define STEPS_PER_REVOLUTION 4096
+// #define STEPPER_INTERFACE AccelStepper::HALF4WIRE // полушаговый, 4 проводной
+// #define STEPS_PER_REVOLUTION 4096
 
-// #define STEPPER_INTERFACE AccelStepper::FULL4WIRE // поношаговый, 4 проводной
-// #define STEPS_PER_REVOLUTION 2048
+#define STEPPER_INTERFACE AccelStepper::FULL4WIRE // поношаговый, 4 проводной
+#define STEPS_PER_REVOLUTION 2048
 
 class Stepper : virtual public AccelStepper
 {
