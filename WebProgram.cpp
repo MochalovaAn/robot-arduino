@@ -1,11 +1,11 @@
 #include "Web.h"
 
-void handleProgram()
+void handleProgram(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  if (webServer.method() == HTTP_GET)
+  if (request->method() == HTTP_GET)
   {
     DynamicJsonDocument doc(128);
 
@@ -20,77 +20,73 @@ void handleProgram()
     String content;
     serializeJson(doc, content);
 
-    webServer.send(200, "application/json", content.c_str());
+    request->send(200, "application/json", content.c_str());
     Serial.println(200);
   }
   else
-    methodNotAllowed("GET");
+    methodNotAllowed(request, "GET");
 }
 
-void handleProgramText()
+void handleProgramText(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  if (webServer.method() == HTTP_GET)
+  if (request->method() == HTTP_GET)
   {
     String content = program.getAsText();
 
-    webServer.send(200, "text/plain", content);
+    request->send(200, "text/plain", content);
     Serial.println(200);
   }
-  else if (webServer.method() == HTTP_POST)
+  else if (request->method() == HTTP_POST)
   {
     String text = "";
 
-    if (webServer.header("Content-Type") == "text/plain")
+    if (request->hasArg("text"))
     {
-      text = webServer.arg("plain");
-    }
-    else if (webServer.hasArg("text"))
-    {
-      text = webServer.arg("text");
+      text = request->arg("text");
     }
 
-    webServer.send(204);
+    request->send(204);
     Serial.println(204);
 
     program.setAsText(text);
   }
   else
-    methodNotAllowed("GET, POST");
+    methodNotAllowed(request, "GET, POST");
 }
 
-void handleProgramRun()
+void handleProgramRun(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  if (webServer.method() == HTTP_POST)
+  if (request->method() == HTTP_POST)
   {
-    webServer.send(204);
+    request->send(204);
     Serial.println(204);
 
     program.run();
   }
   else
-    methodNotAllowed("POST");
+    methodNotAllowed(request, "POST");
 }
 
-void handleProgramStop()
+void handleProgramStop(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  if (webServer.method() == HTTP_POST)
+  if (request->method() == HTTP_POST)
   {
-    int force = webServer.arg("force").toInt();
+    int force = request->arg("force").toInt();
 
-    webServer.send(204);
+    request->send(204);
     Serial.println(204);
 
     program.stop(force != 0);
   }
   else
-    methodNotAllowed("POST");
+    methodNotAllowed(request, "POST");
 }

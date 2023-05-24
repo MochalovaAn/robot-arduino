@@ -13,6 +13,9 @@
   <script src="exporting.js"></script>
   <script src="export-data.js"></script>
   <script src="filesaver.min.js"></script>
+  <script src="robot-api.js"></script>
+  <script defer="defer" src="robot-charts.js"></script>
+  <script defer="defer" src="robot-events.js"></script>
 </head>
 
 <body>
@@ -83,7 +86,7 @@
         <ul class="nav nav-underline flex-nowrap mb-2 mb-md-0" id="tabs-nav" role="tablist">
           <li class="nav-item" role="presentation">
             <button class="nav-link active" id="control-tab" data-bs-toggle="tab" data-bs-target="#control-tab-pane"
-              type="button" role="tab" aria-controls="control-tab-pane" aria-selected="false">Шаговый двигатель</button>
+              type="button" role="tab" aria-controls="control-tab-pane" aria-selected="false">Ручное управление</button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="program-tab" data-bs-toggle="tab" data-bs-target="#program-tab-pane"
@@ -204,14 +207,10 @@
 
           <div class="col-lg-7">
             <textarea class="form-control" id="program" rows="11">
-acceleration 500
-speed 1000
-rotate 4096
-pause 3000
+acceleration 1000
 speed 500
-timer 250
-rotate -100500000
-stop 1
+rotate 2048
+rotate -2048
 repeat</textarea>
           </div>
         </div>
@@ -262,10 +261,6 @@ repeat</textarea>
       <small class="text-secondary text-opacity-25" id="millis">Disconnected</small>
     </div>
   </div>
-
-  <script src="robot-events.js"></script>
-  <script src="robot-api.js"></script>
-  <script src="robot-charts.js"></script>
 </body>
 
 </html>

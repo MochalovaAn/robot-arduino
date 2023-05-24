@@ -1,26 +1,39 @@
 #include "Web.h"
 
-void logRequest(bool eol)
+char *httpMethod(WebRequestMethodComposite method)
 {
-  char *httpMethods[] = {"ANY", "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"};
+  switch (method)
+  {
+    case HTTP_GET: return "GET";
+    case HTTP_POST: return "POST";
+    case HTTP_DELETE: return "DELETE";
+    case HTTP_PUT: return "PUT";
+    case HTTP_PATCH: return "PATCH";
+    case HTTP_HEAD: return "HEAD";
+    case HTTP_OPTIONS: return "OPTIONS";
+  }
+  return "ANY";
+}
 
-  Serial.print(webServer.client().remoteIP());
+void logRequest(AsyncWebServerRequest *request, bool eol)
+{
+  Serial.print(request->client()->remoteIP());
   Serial.print(" - \"");
-  Serial.print(httpMethods[webServer.method()]);
+  Serial.print(httpMethod(request->method()));
   Serial.print(" ");
-  Serial.print(webServer.uri());
+  Serial.print(request->url());
 
-  if (webServer.args() > 0)
+  if (request->args() > 0)
   {
     int count = 0;
-    for (int i = 0; i < webServer.args(); i++)
+    for (int i = 0; i < request->args(); i++)
     {
-      if (webServer.argName(i) == "plain")
+      if (request->argName(i) == "plain")
         break;
       Serial.print(count ? "&" : "?");
-      Serial.print(webServer.argName(i));
+      Serial.print(request->argName(i));
       Serial.print("=");
-      Serial.print(webServer.arg(i));
+      Serial.print(request->arg(i));
       count++;
     }
   }
@@ -31,27 +44,28 @@ void logRequest(bool eol)
     Serial.println();
 }
 
-void badRequest()
+void badRequest(AsyncWebServerRequest *request)
 {
-  webServer.send(400, "text/plain", "400 Bad Request");
+  request->send(400, "text/plain", "400 Bad Request");
   Serial.println(400);
 }
 
-void notFound()
+void notFound(AsyncWebServerRequest *request)
 {
-  webServer.send(404, "text/plain", "404 Not Found");
+  request->send(404, "text/plain", "404 Not Found");
   Serial.println(404);
 }
 
-void methodNotAllowed(String allow)
+void methodNotAllowed(AsyncWebServerRequest *request, String allow)
 {
-  webServer.sendHeader("Allow", allow);
-  webServer.send(405, "text/plain", "405 Method Not Allowed");
+  AsyncWebServerResponse *response = request->beginResponse(405, "text/plain", "405 Method Not Allowed");
+  response->addHeader("Allow", allow);
+  request->send(response);
   Serial.println(405);
 }
 
-void internalServerError()
+void internalServerError(AsyncWebServerRequest *request)
 {
-  webServer.send(500, "text/plain", "500 Internal Server Error");
+  request->send(500, "text/plain", "500 Internal Server Error");
   Serial.println(500);
 }

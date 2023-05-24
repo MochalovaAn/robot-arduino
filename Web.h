@@ -3,33 +3,32 @@
 
 #include "Extern.h"
 
-bool handleCaptivePortal();
+bool handleCaptivePortal(AsyncWebServerRequest *request);
 
-void handleStepper();
-void handleStepperRotate();
-void handleStepperStop();
-void handleStepperReset();
-void handleStepperEnable();
-void handleStepperDisable();
+void handleStepper(AsyncWebServerRequest *request);
+void handleStepperRotate(AsyncWebServerRequest *request);
+void handleStepperStop(AsyncWebServerRequest *request);
+void handleStepperReset(AsyncWebServerRequest *request);
+void handleStepperEnable(AsyncWebServerRequest *request);
+void handleStepperDisable(AsyncWebServerRequest *request);
 
-void handleGyro();
+void handleGyro(AsyncWebServerRequest *request);
 
-void handleProgram();
-void handleProgramText();
-void handleProgramRun();
-void handleProgramStop();
+void handleProgram(AsyncWebServerRequest *request);
+void handleProgramText(AsyncWebServerRequest *request);
+void handleProgramRun(AsyncWebServerRequest *request);
+void handleProgramStop(AsyncWebServerRequest *request);
 
-void handleEvents();
-void eventsOnConnect(ESP8266EventSourceClient *client);
-void eventsOnDisconnect(ESP8266EventSourceClient *client);
+void handleFile(AsyncWebServerRequest *request);
+void handleNotFound(AsyncWebServerRequest *request);
+
+void eventsOnConnect(AsyncEventSourceClient *client);
 void eventsSendStatus(unsigned long now);
 
-void handleFile();
-
-void logRequest(bool eol);
-void badRequest();
-void notFound();
-void methodNotAllowed(String allow);
-void internalServerError();
+void logRequest(AsyncWebServerRequest *request, bool eol);
+void badRequest(AsyncWebServerRequest *request);
+void notFound(AsyncWebServerRequest *request);
+void methodNotAllowed(AsyncWebServerRequest *request, String allow);
+void internalServerError(AsyncWebServerRequest *request);
 
 #endif // WEB_H

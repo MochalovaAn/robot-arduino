@@ -1,19 +1,18 @@
 #include "Web.h"
 
-bool handleCaptivePortal()
+bool handleCaptivePortal(AsyncWebServerRequest *request)
 {
-  logRequest(false);
+  logRequest(request, false);
 
-  if (webServer.hostHeader() != WiFi.softAPIP().toString())
+  if (request->header("Host") != WiFi.softAPIP().toString())
   {
     String redirectHost = WiFi.softAPIP().toString();
 
-    webServer.sendHeader("Location", F("http://") + redirectHost);
-    webServer.send(302, "text/plain", "");
+    request->redirect(F("http://") + redirectHost);
 
     Serial.print(302);
     Serial.print(" (");
-    Serial.print(webServer.hostHeader());
+    Serial.print(request->header("Host"));
     Serial.print(" -> ");
     Serial.print(redirectHost);
     Serial.println(")");

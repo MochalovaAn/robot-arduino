@@ -5,6 +5,8 @@ bool Gyro::init(unsigned long _period)
   Wire.begin();
   mpu.initialize();
 
+  deviceID = mpu.getDeviceID();
+
   // у MPU6050 частота обновления акселерометра - 1 КГц, гироскопа - 8 КГц,
   // поэтому возможность работать c периодом меньше 1 мс не нужна
 
@@ -30,7 +32,7 @@ bool Gyro::getMotion()
 
   // читаем сырые данные сенсоров, диапазон значений +/- 32767
   mpu.getMotion6(&iax, &iay, &iaz, &igx, &igy, &igz);
-  it = mpu.getTemperature();
+  // it = mpu.getTemperature();
 
   // переводим значения сенсоров в их единицы с учетом настроек чувствительности
   ax = ACCEL_RAW_TO_FS(iax);
@@ -41,7 +43,7 @@ bool Gyro::getMotion()
   gy = GYRO_RAW_TO_FS(igy);
   gz = GYRO_RAW_TO_FS(igz);
 
-  t = TEMP_RAW_TO_FS(it);
+  // t = TEMP_RAW_TO_FS(it);
 
   // обновляем фильтр и вычисляем ориентацию
   filter.updateIMU(gx, gy, gz, ax, ay, az);

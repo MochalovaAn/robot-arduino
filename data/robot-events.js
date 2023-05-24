@@ -39,8 +39,8 @@ source.addEventListener(
 
     // speed and acceleration values by program
 
-    const stepperSpeed = data.stepper.speed * Math.sign(data.stepper.distanceToGo || prevData.stepper.distanceToGo);
-    const stepperAcceleration = data.stepper.acceleration;
+    const direction = Math.sign(data.stepper.distanceToGo || prevData.stepper.distanceToGo);
+    const stepperSpeed = data.stepper.speed * direction;
 
     if (prevData.program.isRunning || firstEvent) {
       if (data.stepper.isRunning && !power.checked) power.checked = true;
@@ -49,17 +49,15 @@ source.addEventListener(
         speed.value = stepperSpeed;
         speed_hint.innerHTML = stepperSpeed;
       }
-      if (!accelerationCapture && stepperAcceleration != acceleration.value) {
-        acceleration.value = stepperAcceleration;
-        acceleration_hint.innerHTML = stepperAcceleration;
+      if (!accelerationCapture && data.stepper.acceleration != acceleration.value) {
+        acceleration.value = data.stepper.acceleration;
+        acceleration_hint.innerHTML = data.stepper.acceleration;
       }
     }
 
     // control buttons
 
     if (prevData.stepper.isRunning !== data.stepper.isRunning) {
-      if (data.stepper.isRunning) power.checked = true;
-
       start_stepper.disabled = data.stepper.isRunning;
       stop_stepper.disabled = !data.stepper.isRunning;
     }
@@ -87,17 +85,18 @@ source.addEventListener(
       appendChart(speed_chart, 0, time, stepperSpeed);
       appendChart(speed_chart, 1, time, data.stepper.currentSpeed);
 
-      appendChart(acceleration_chart, 0, time, (100 * Math.abs(data.gyro.ax)) / 2);
-      appendChart(acceleration_chart, 1, time, (100 * Math.abs(data.gyro.ay)) / 2);
-      appendChart(acceleration_chart, 2, time, (100 * Math.abs(data.gyro.az)) / 2);
-      appendChart(acceleration_chart, 3, time, (100 * stepperAcceleration) / 2048);
+      // appendChart(acceleration_chart, 0, time, (100 * Math.abs(data.gyro.ax)) / 2);
+      // appendChart(acceleration_chart, 1, time, (100 * Math.abs(data.gyro.ay)) / 2);
+      // appendChart(acceleration_chart, 2, time, (100 * Math.abs(data.gyro.az)) / 2);
+      // appendChart(acceleration_chart, 3, time, (100 * data.stepper.acceleration) / data.stepper.stepsPerRevolution);
 
       const stepperPosition = data.stepper.currentPosition % data.stepper.stepsPerRevolution;
+      const stepperAngle = Math.abs(360 * stepperPosition) / data.stepper.stepsPerRevolution;
 
-      appendChart(gyro_chart, 0, time, data.gyro.roll);
-      appendChart(gyro_chart, 1, time, data.gyro.pitch);
-      appendChart(gyro_chart, 2, time, data.gyro.yaw);
-      appendChart(gyro_chart, 3, time, (360 * stepperPosition) / data.stepper.stepsPerRevolution);
+      // appendChart(gyro_chart, 0, time, data.gyro.roll);
+      // appendChart(gyro_chart, 1, time, data.gyro.pitch);
+      // appendChart(gyro_chart, 2, time, data.gyro.yaw);
+      appendChart(gyro_chart, 3, time, stepperAngle);
     }
 
     millis.innerHTML = `${data.millis} - ${data.clients}/10`;

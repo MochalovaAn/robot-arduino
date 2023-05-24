@@ -5,21 +5,21 @@
 
 // ULN2003 motor driver pins
 
-#define STEPPER_IN1 0  // D3
-#define STEPPER_IN2 2  // D4
-#define STEPPER_IN3 14 // D5
-#define STEPPER_IN4 12 // D6
+#define IN1 D1
+#define IN2 D2
+#define IN3 D5
+#define IN4 D6
 
-// #define STEPPER_INTERFACE AccelStepper::HALF4WIRE // полушаговый, 4 проводной
+// #define INTERFACE AccelStepper::HALF4WIRE // полушаговый, 4 проводной
 // #define STEPS_PER_REVOLUTION 4096
 
-#define STEPPER_INTERFACE AccelStepper::FULL4WIRE // поношаговый, 4 проводной
+#define INTERFACE AccelStepper::FULL4WIRE // полношаговый, 4 проводной
 #define STEPS_PER_REVOLUTION 2048
 
 class Stepper : virtual public AccelStepper
 {
 public:
-  Stepper() : AccelStepper(STEPPER_INTERFACE, STEPPER_IN1, STEPPER_IN2, STEPPER_IN3, STEPPER_IN4, false){};
+  Stepper() : AccelStepper(INTERFACE, IN1, IN3, IN2, IN4, false){};
 
   uint16_t stepsPerRevolution() { return STEPS_PER_REVOLUTION; }
 };

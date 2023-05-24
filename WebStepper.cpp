@@ -1,11 +1,11 @@
 #include "Web.h"
 
-void handleStepper()
+void handleStepper(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  if (webServer.method() == HTTP_GET)
+  if (request->method() == HTTP_GET)
   {
     DynamicJsonDocument doc(1024);
 
@@ -21,118 +21,124 @@ void handleStepper()
     String content;
     serializeJson(doc, content);
 
-    webServer.send(200, "application/json", content);
+    request->send(200, "application/json", content);
     Serial.println(200);
   }
-  else if (webServer.method() == HTTP_POST)
+  else if (request->method() == HTTP_POST)
   {
-    if (webServer.hasArg("acceleration"))
+    if (request->hasArg("acceleration"))
     {
-      float acceleration = webServer.arg("acceleration").toFloat();
+      float acceleration = request->arg("acceleration").toFloat();
       stepper.setAcceleration(acceleration);
     }
 
-    if (webServer.hasArg("speed"))
+    if (request->hasArg("speed"))
     {
-      float speed = webServer.arg("speed").toFloat();
+      float speed = request->arg("speed").toFloat();
       stepper.setMaxSpeed(speed);
     }
 
-    if (webServer.hasArg("rotate"))
+    if (request->hasArg("rotate"))
     {
-      long relative = webServer.arg("rotate").toInt();
+      long relative = request->arg("rotate").toInt();
       stepper.move(relative);
     }
 
-    webServer.send(204);
+    request->send(204);
     Serial.println(204);
   }
   else
-    methodNotAllowed("GET, POST");
+    methodNotAllowed(request, "GET, POST");
 }
 
-void handleStepperRotate()
+void handleStepperRotate(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  if (webServer.method() == HTTP_POST)
+  if (request->method() == HTTP_POST)
   {
-    if (webServer.hasArg("steps"))
+    Serial.print(request->args());
+    Serial.print(" ");
+
+    if (request->hasArg("steps"))
     {
-      long relative = webServer.arg("steps").toInt();
+      long relative = request->arg("steps").toInt();
       stepper.move(relative);
+
+      Serial.print(relative);
+      Serial.print(" ");
     }
 
-    webServer.send(204);
+    request->send(204);
     Serial.println(204);
   }
   else
-    methodNotAllowed("POST");
+    methodNotAllowed(request, "POST");
 }
 
-void handleStepperStop()
+void handleStepperStop(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  if (webServer.method() == HTTP_POST)
+  if (request->method() == HTTP_POST)
   {
-    int force = webServer.arg("force").toInt();
+    int force = request->arg("force").toInt();
     force ? stepper.setCurrentPosition(stepper.currentPosition()) : stepper.stop();
 
-    webServer.send(204);
+    request->send(204);
     Serial.println(204);
   }
   else
-    methodNotAllowed("POST");
+    methodNotAllowed(request, "POST");
 }
 
-void handleStepperReset()
+void handleStepperReset(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  if (webServer.method() == HTTP_POST)
+  if (request->method() == HTTP_POST)
   {
-    long position = webServer.arg("position").toInt();
+    long position = request->arg("position").toInt();
     stepper.setCurrentPosition(position);
 
-    webServer.send(204);
+    request->send(204);
     Serial.println(204);
   }
   else
-    methodNotAllowed("POST");
+    methodNotAllowed(request, "POST");
 }
 
-void handleStepperEnable()
+void handleStepperEnable(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  if (webServer.method() == HTTP_POST)
+  if (request->method() == HTTP_POST)
   {
     stepper.enableOutputs();
 
-    webServer.send(204);
+    request->send(204);
     Serial.println(204);
   }
   else
-    methodNotAllowed("POST");
+    methodNotAllowed(request, "POST");
 }
 
-void handleStepperDisable()
+void handleStepperDisable(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  if (webServer.method() == HTTP_POST)
+  if (request->method() == HTTP_POST)
   {
     stepper.disableOutputs();
 
-    webServer.send(204);
+    request->send(204);
     Serial.println(204);
   }
   else
-    methodNotAllowed("POST");
+    methodNotAllowed(request, "POST");
 }

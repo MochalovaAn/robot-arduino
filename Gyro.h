@@ -20,13 +20,13 @@ private:
   unsigned long period, timer;
 
 public:
+  uint8_t deviceID;
   float ax, ay, az, gx, gy, gz, t;
   float roll, pitch, yaw;
 
   bool init(unsigned long _period);
   bool getMotion();
-
-  uint8_t getDeviceID() { return mpu.getDeviceID(); }
+  uint8_t getDeviceID() { return mpu.getDeviceID(); };
 };
 
 #endif // GYRO_H

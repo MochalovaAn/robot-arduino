@@ -3,7 +3,7 @@
 
 #include <AccelStepper.h>
 
-#define COMMAND_MAX 4096
+#define COMMAND_MAX 1024
 #define NAME_MAX 4
 
 #define PROGRAM_NOTEXT 0

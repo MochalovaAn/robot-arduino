@@ -1,15 +1,15 @@
 #include "Web.h"
 
-void handleGyro()
+void handleGyro(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  if (webServer.method() == HTTP_GET)
+  if (request->method() == HTTP_GET)
   {
     DynamicJsonDocument doc(128);
     
-    doc["deviceID"] = gyro.getDeviceID();
+    doc["deviceID"] = gyro.deviceID;
     doc["roll"] = gyro.roll;
     doc["yaw"] = gyro.yaw;
     doc["pitch"] = gyro.pitch;
@@ -24,9 +24,9 @@ void handleGyro()
     String content;
     serializeJson(doc, content);
 
-    webServer.send(200, "application/json", content.c_str());
+    request->send(200, "application/json", content.c_str());
     Serial.println(200);
   }
   else
-    methodNotAllowed("GET");
+    methodNotAllowed(request, "GET");
 }

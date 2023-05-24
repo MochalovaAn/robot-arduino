@@ -62,17 +62,16 @@ function downloadProgram() {
 }
 
 function uploadProgram(text) {
-  return fetch("/program/text", {
-    method: "POST",
-    headers: { "Content-Type": "text/plain" },
-    body: text,
-  })
+  const params = new URLSearchParams();
+  params.append("text", text);
+  return fetch(`/program/text?${params.toString()}`, { method: "POST" })
     .then((response) => console.log("Upload program:", response.status))
     .catch((e) => console.error("Upload program error.", e));
 }
 
 function runProgram(text) {
   return uploadProgram(text)
+    .then(() => powerOn())
     .then(() => fetch("/program/run", { method: "POST" }))
     .then((response) => console.log("Run program:", response.status))
     .catch((e) => console.error("Run program error.", e));

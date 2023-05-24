@@ -1,40 +1,33 @@
 #include "Extern.h"
 #include "Web.h"
 
-void handleFile()
+void handleFile(AsyncWebServerRequest *request)
 {
-  if (handleCaptivePortal())
+  if (handleCaptivePortal(request))
     return;
 
-  String path = webServer.uri();
+  String path = request->url();
   if (path == "/")
     path += "index.html";
 
   if (!LittleFS.exists(path))
   {
-    notFound();
+    notFound(request);
     return;
   }
 
-  if (webServer.method() != HTTP_GET)
+  if (request->method() != HTTP_GET)
   {
-    methodNotAllowed("GET");
+    methodNotAllowed(request, "GET");
     return;
   }
 
-  File file = LittleFS.open(path, "r");
-  if (!file)
-  {
-    internalServerError();
-    return;
-  }
+  request->send(LittleFS, path);
 
-  webServer.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  webServer.sendHeader("Pragma", "no-cache");
-  webServer.sendHeader("Expires", "-1");
-  webServer.streamFile(file, mime::getContentType(path));
-
-  file.close();
+  // request->sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  // request->sendHeader("Pragma", "no-cache");
+  // request->sendHeader("Expires", "-1");
+  // request->streamFile(file, mime::getContentType(path));
 
   Serial.println(200);
 }

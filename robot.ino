@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include "ESP8266EventSource.h"
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
 
 #include "Stop.h"
@@ -22,11 +22,11 @@ IPAddress WIFI_NETMASK(255, 255, 0, 0);
 
 // Events send period
 
-#define EVENTS_PERIOD 100 
+#define EVENTS_PERIOD 100
 
 DNSServer dnsServer;
-ESP8266WebServer webServer(80);
-ESP8266EventSource events("");
+AsyncWebServer webServer(80);
+AsyncEventSource events("/events");
 Stepper stepper;
 Gyro gyro;
 Program program(&stepper);
@@ -55,16 +55,16 @@ void setup()
 
   // setup MPU-6050
 
-  Serial.println("Starting MPU-6050...");
+  // Serial.println("Starting MPU-6050...");
 
-  if (!gyro.init(EVENTS_PERIOD))
-  {
-    Serial.println("Error: MPU-6050 not found");
-    // stop(2);
-  }
+  // if (!gyro.init(EVENTS_PERIOD))
+  // {
+  //   Serial.println("Error: MPU-6050 not found");
+  //   // stop(2);
+  // }
 
-  Serial.print("Device ID: ");
-  Serial.println(gyro.getDeviceID());
+  // Serial.print("Device ID: ");
+  // Serial.println(gyro.deviceID);
 
   // setup Wi-Fi access point
 
@@ -105,26 +105,23 @@ void setup()
   Serial.println(WIFI_LOCAL_IP);
   Serial.println("EventSource URL: /events");
 
-  events.onConnect(eventsOnConnect);
-  events.onDisconnect(eventsOnDisconnect);
-  events.begin(&webServer);
-
-  webServer.on("/stepper", handleStepper);
   webServer.on("/stepper/rotate", handleStepperRotate);
   webServer.on("/stepper/stop", handleStepperStop);
   webServer.on("/stepper/reset", handleStepperReset);
   webServer.on("/stepper/enable", handleStepperEnable);
   webServer.on("/stepper/disable", handleStepperDisable);
+  webServer.on("/stepper", handleStepper);
   webServer.on("/gyro", handleGyro);
-  webServer.on("/program", handleProgram);
   webServer.on("/program/text", handleProgramText);
   webServer.on("/program/run", handleProgramRun);
   webServer.on("/program/stop", handleProgramStop);
-  webServer.on("/events", handleEvents);
+  webServer.on("/program", handleProgram);
 
   webServer.onNotFound(handleFile);
 
-  webServer.collectHeaders("Last-Event-ID", "Content-Type");
+  events.onConnect(eventsOnConnect);
+  webServer.addHandler(&events);
+
   webServer.begin();
 
   Serial.println("Robot started");
@@ -136,11 +133,10 @@ unsigned long timer = 0;
 void loop()
 {
   dnsServer.processNextRequest();
-  webServer.handleClient();
-  events.keepAlive();
   program.execute();
   stepper.run();
-  gyro.getMotion();
+
+  // if (gyro.getMotion()) eventsSendStatus(millis());
 
   unsigned long now = millis();
   if (now > timer + EVENTS_PERIOD)
