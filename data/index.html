@@ -21,7 +21,7 @@
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
     <symbol id="record-circle-fill" viewBox="0 0 16 16">
-      <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-8 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+      <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-8 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
     </symbol>
     <symbol id="exclamation" viewBox="0 0 16 16">
       <path
@@ -58,22 +58,13 @@
 
     <!-- charts -->
     <div class="row mb-3">
-      <div class="col-lg-8">
-        <div class="row">
-          <div class="col-md-6">
-            <figure class="highcharts-figure">
-              <div id="speed-chart" class="chart-container"></div>
-            </figure>
-          </div>
-          <div class="col-md-6">
-            <figure class="highcharts-figure">
-              <div id="acceleration-chart" class="chart-container"></div>
-            </figure>
-          </div>
-        </div>
+      <div class="col-lg-6">
+        <figure class="highcharts-figure">
+          <div id="speed-chart" class="chart-container"></div>
+        </figure>
       </div>
 
-      <div class="col-lg-4">
+      <div class="col-lg-6">
         <figure class="highcharts-figure">
           <div id="gyro-chart"></div>
         </figure>
@@ -92,8 +83,8 @@
             <button class="nav-link" id="program-tab" data-bs-toggle="tab" data-bs-target="#program-tab-pane"
               type="button" role="tab" aria-controls="program-tab-pane" aria-selected="true">
               Программа
-              <span class="badge text-bg-warning " id="stop_bage">Stop</span>
-              <span class="badge text-bg-success d-none" id="run_bage">Run</span>
+              <span class="badge text-bg-warning " id="stop_bage">Stopped</span>
+              <span class="badge text-bg-success d-none" id="run_bage">Running</span>
             </button>
           </li>
         </ul>

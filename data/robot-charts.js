@@ -68,18 +68,19 @@ var speed_chart = createChart("speed-chart", "Скорость вращения 
   { name: "Текущая", color: colors[0] },
 ]);
 
-var acceleration_chart = createChart("acceleration-chart", "Ускорение", 0, 100, [
-  { name: "Гироскоп X", color: colors[2], visible: false },
-  { name: "Гироскоп Y", color: colors[3], visible: false },
-  { name: "Гироскоп Z", color: colors[4] },
-  { name: "Двигатель", color: colors[0] },
-]);
+// var acceleration_chart = createChart("acceleration-chart", "Ускорение", 0, 100, [
+//   { name: "Гироскоп X", color: colors[2], visible: false },
+//   { name: "Гироскоп Y", color: colors[3], visible: false },
+//   { name: "Гироскоп Z", color: colors[4] },
+//   { name: "Двигатель", color: colors[0] },
+// ]);
 
 var gyro_chart = createChart("gyro-chart", "Угол поворота", 0, 360, [
-  { name: "Крен (X)", color1: colors[2], visible: false },
-  { name: "Тангаж (Y)", color1: colors[3], visible: false },
-  { name: "Рыскание (Z)", color1: colors[4] },
+  // { name: "Крен (X)", color1: colors[2], visible: false },
+  // { name: "Тангаж (Y)", color1: colors[3], visible: false },
+  // { name: "Рыскание (Z)", color1: colors[4], visible: false },
   { name: "Двигатель", color1: colors[0] },
+  { name: "Робот", color1: colors[4], visible: false },
 ]);
 
 function clearCharts() {

@@ -96,7 +96,10 @@ source.addEventListener(
       // appendChart(gyro_chart, 0, time, data.gyro.roll);
       // appendChart(gyro_chart, 1, time, data.gyro.pitch);
       // appendChart(gyro_chart, 2, time, data.gyro.yaw);
-      appendChart(gyro_chart, 3, time, stepperAngle);
+      // appendChart(gyro_chart, 3, time, stepperAngle);
+
+      appendChart(gyro_chart, 0, time, stepperAngle);
+      // appendChart(gyro_chart, 2, time, data.gyro.yaw);
     }
 
     millis.innerHTML = `${data.millis} - ${data.clients}/10`;
