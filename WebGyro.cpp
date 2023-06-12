@@ -1,4 +1,5 @@
 #include "Web.h"
+#include "Gyro.h"
 
 void handleGyro(AsyncWebServerRequest *request)
 {
@@ -9,17 +10,10 @@ void handleGyro(AsyncWebServerRequest *request)
   {
     DynamicJsonDocument doc(128);
     
-    doc["deviceID"] = gyro.deviceID;
-    doc["roll"] = gyro.roll;
-    doc["yaw"] = gyro.yaw;
-    doc["pitch"] = gyro.pitch;
-    doc["ax"] = gyro.ax;
-    doc["ay"] = gyro.ay;
-    doc["az"] = gyro.az;
-    doc["gx"] = gyro.gx;
-    doc["gy"] = gyro.gy;
-    doc["gz"] = gyro.gz;
-    doc["t"] = gyro.t;
+    doc["deviceID"] = Gyro.deviceID;
+    doc["roll"] = Gyro.roll;
+    doc["yaw"] = Gyro.yaw;
+    doc["pitch"] = Gyro.pitch;
 
     String content;
     serializeJson(doc, content);

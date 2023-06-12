@@ -1,60 +1,89 @@
+#include <Wire.h>
+#include <MPU6050_6Axis_MotionApps20.h>
 #include "Gyro.h"
 
-bool Gyro::init(unsigned long _period)
+GyroClass Gyro;
+MPU6050 Mpu;
+
+bool GyroClass::init()
 {
+  uint8_t devStatus;
+
+  deviceID = 0;
+  dmpReady = false;
+
+  // join I2C bus (I2Cdev library doesn't do this automatically)
   Wire.begin();
-  mpu.initialize();
+  Wire.setClock(400000); // 400kHz I2C clock
 
-  deviceID = mpu.getDeviceID();
+  // initialize MPU6050
+  Mpu.initialize();
 
-  // у MPU6050 частота обновления акселерометра - 1 КГц, гироскопа - 8 КГц,
-  // поэтому возможность работать c периодом меньше 1 мс не нужна
+  // verify connection
+  Serial.println("Testing MPU6050 connection...");
+  if (!Mpu.testConnection())
+  {
+    Serial.println("MPU6050 connection failed");
+    return false;
+  }
 
-  filter.begin(1000 / _period);
-  period = _period;
-  timer = 0;
+  Serial.println("MPU6050 connection successful");
+  deviceID = Mpu.getDeviceID();
 
-  return mpu.testConnection();
+  // load and configure the DMP
+  Serial.println("Initializing DMP...");
+  devStatus = Mpu.dmpInitialize();
+  if (devStatus != 0)
+  {
+    Serial.print("DMP initialization failed (code ");
+    Serial.print(devStatus);
+    Serial.println(")");
+    return false;
+  }
+  Serial.println();
+
+  // Calibration Time: generate offsets and calibrate our MPU6050
+  Mpu.CalibrateAccel(6);
+  Mpu.CalibrateGyro(6);
+
+  // turn on the DMP, now that it's ready
+  Serial.println("Enabling DMP...");
+  Mpu.setDMPEnabled(true);
+
+  // set our DMP Ready flag so the getMotion() function knows it's okay to use it
+  Serial.println("DMP is ready");
+  dmpReady = true;
+
+  return true;
 }
 
-bool Gyro::getMotion()
+bool GyroClass::getMotion()
 {
-  int16_t iax, iay, iaz, igx, igy, igz, it;
-  unsigned long now = millis();
+  uint8_t fifoBuffer[64]; // FIFO storage buffer
+  Quaternion q;           // [w, x, y, z]         quaternion container
+  VectorFloat gravity;    // [x, y, z]            gravity vector
+  float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
-  // фильтр настроен на обновление с периодом period, делаем так, чтобы чтение
-  // данных выполнялось с этим же периодом
-
-  if (now < timer)
+  // if programming failed, don't try to do anything
+  if (!dmpReady)
     return false;
 
-  timer += ((now - timer) / period + 1) * period;
+  // read a packet from FIFO
+  if (!Mpu.dmpGetCurrentFIFOPacket(fifoBuffer))
+    return false;
 
-  // читаем сырые данные сенсоров, диапазон значений +/- 32767
-  mpu.getMotion6(&iax, &iay, &iaz, &igx, &igy, &igz);
-  // it = mpu.getTemperature();
-
-  // переводим значения сенсоров в их единицы с учетом настроек чувствительности
-  ax = ACCEL_RAW_TO_FS(iax);
-  ay = ACCEL_RAW_TO_FS(iay);
-  az = ACCEL_RAW_TO_FS(iaz);
-
-  gx = GYRO_RAW_TO_FS(igx);
-  gy = GYRO_RAW_TO_FS(igy);
-  gz = GYRO_RAW_TO_FS(igz);
-
-  // t = TEMP_RAW_TO_FS(it);
-
-  // обновляем фильтр и вычисляем ориентацию
-  filter.updateIMU(gx, gy, gz, ax, ay, az);
+  // get yaw/pitch/roll angles
+  Mpu.dmpGetQuaternion(&q, fifoBuffer);
+  Mpu.dmpGetGravity(&gravity, &q);
+  Mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
 
   // roll: крен (крыло вверх/вниз), вокруг оси X
   // pitch: тангаж (нос вверх/вниз), вокруг оси Y
   // yaw: рыскание (нос влево/вправо), вокруг оси Z
-
-  roll = filter.getRoll();
-  pitch = filter.getPitch();
-  yaw = filter.getYaw();
+  
+  roll = ypr[2] * 180 / M_PI;
+  pitch = ypr[1] * 180 / M_PI;
+  yaw = ypr[0] * 180 / M_PI;
 
   return true;
 }

@@ -1,7 +1,7 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
 
-#include <AccelStepper.h>
+#include <Arduino.h>
 
 #define COMMAND_MAX 1024
 #define NAME_MAX 4
@@ -16,10 +16,9 @@ typedef struct command_t
   float value;
 } Command;
 
-class Program
+class ProgramClass
 {
 private:
-  AccelStepper *_stepper;
   Command _commands[COMMAND_MAX];
   size_t _count;
   size_t _cycle;
@@ -29,8 +28,6 @@ private:
   bool _pause;
 
 public:
-  Program(AccelStepper *stepper);
-
   bool setAsText(const String &text);
   bool setAsText(const char *text);
   String getAsText();
@@ -48,5 +45,7 @@ public:
   long pause() { return _pause; }
   bool isRunning() { return _state == PROGRAM_RUN; }
 };
+
+extern ProgramClass Program;
 
 #endif

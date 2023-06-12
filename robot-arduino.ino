@@ -4,7 +4,6 @@
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
-
 #include "Stop.h"
 #include "Gyro.h"
 #include "Stepper.h"
@@ -24,12 +23,9 @@ IPAddress WIFI_NETMASK(255, 255, 0, 0);
 
 #define EVENTS_PERIOD 100
 
-DNSServer dnsServer;
-AsyncWebServer webServer(80);
-AsyncEventSource events("/events");
-Stepper stepper;
-Gyro gyro;
-Program program(&stepper);
+DNSServer DnsServer;
+AsyncWebServer WebServer(80);
+AsyncEventSource Events("/events");
 
 void setup()
 {
@@ -53,18 +49,17 @@ void setup()
   Serial.print("FS Used: ");
   Serial.println(fsinfo.usedBytes);
 
-  // setup MPU-6050
+  // setup Gyroscope
 
-  // Serial.println("Starting MPU-6050...");
+  // Serial.println("Initializing Gyroscope...");
 
-  // if (!gyro.init(EVENTS_PERIOD))
+  // if (!Gyro.init())
   // {
-  //   Serial.println("Error: MPU-6050 not found");
+  //   Serial.println("Error: Failed to initalize Gyroscope");
   //   // stop(2);
   // }
-
-  // Serial.print("Device ID: ");
-  // Serial.println(gyro.deviceID);
+  // else
+  //   Serial.println("Gyroscope initialized successfully");
 
   // setup Wi-Fi access point
 
@@ -82,13 +77,14 @@ void setup()
   Serial.println(WIFI_SSID);
   Serial.print("Wi-Fi Password: ");
   Serial.println(WIFI_PASSWORD);
+  Serial.println("Wi-Fi started successfully");
 
   // setup the DNS server redirecting all the domains to the Wi-Fi access point
 
   Serial.println("Starting DNS server...");
 
-  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-  if (!dnsServer.start(53, "*", WIFI_LOCAL_IP))
+  DnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+  if (!DnsServer.start(53, "*", WIFI_LOCAL_IP))
   {
     Serial.println("Error: Failed to start DNS server");
     stop(4);
@@ -96,33 +92,35 @@ void setup()
 
   Serial.print("DNS-server IPv4: ");
   Serial.println(WIFI_LOCAL_IP);
+  Serial.println("DNS-server started successfully");
 
   // setup WEB server page handlers
 
   Serial.println("Starting WEB server...");
 
-  Serial.print("WEB-server URL: http://");
+  WebServer.on("/stepper/rotate", handleStepperRotate);
+  WebServer.on("/stepper/stop", handleStepperStop);
+  WebServer.on("/stepper/reset", handleStepperReset);
+  WebServer.on("/stepper/enable", handleStepperEnable);
+  WebServer.on("/stepper/disable", handleStepperDisable);
+  WebServer.on("/stepper", handleStepper);
+  WebServer.on("/gyro", handleGyro);
+  WebServer.on("/program/text", handleProgramText);
+  WebServer.on("/program/run", handleProgramRun);
+  WebServer.on("/program/stop", handleProgramStop);
+  WebServer.on("/program", handleProgram);
+
+  WebServer.onNotFound(handleFile);
+
+  Events.onConnect(eventsOnConnect);
+  WebServer.addHandler(&Events);
+
+  WebServer.begin();
+
+  Serial.print("Homepage URL: http://");
   Serial.println(WIFI_LOCAL_IP);
   Serial.println("EventSource URL: /events");
-
-  webServer.on("/stepper/rotate", handleStepperRotate);
-  webServer.on("/stepper/stop", handleStepperStop);
-  webServer.on("/stepper/reset", handleStepperReset);
-  webServer.on("/stepper/enable", handleStepperEnable);
-  webServer.on("/stepper/disable", handleStepperDisable);
-  webServer.on("/stepper", handleStepper);
-  webServer.on("/gyro", handleGyro);
-  webServer.on("/program/text", handleProgramText);
-  webServer.on("/program/run", handleProgramRun);
-  webServer.on("/program/stop", handleProgramStop);
-  webServer.on("/program", handleProgram);
-
-  webServer.onNotFound(handleFile);
-
-  events.onConnect(eventsOnConnect);
-  webServer.addHandler(&events);
-
-  webServer.begin();
+  Serial.println("WEB-server started successfully");
 
   Serial.println("Robot started");
   Serial.println("Waiting connections...");
@@ -132,16 +130,15 @@ unsigned long timer = 0;
 
 void loop()
 {
-  dnsServer.processNextRequest();
-  program.execute();
-  stepper.run();
-
-  // if (gyro.getMotion()) eventsSendStatus(millis());
+  DnsServer.processNextRequest();
+  Program.execute();
+  Stepper.run();
 
   unsigned long now = millis();
   if (now > timer + EVENTS_PERIOD)
   {
-    eventsSendStatus(now);
+    // Gyro.getMotion();
+    eventsSendStatus(&Events, now);
     timer = now;
   }
 }

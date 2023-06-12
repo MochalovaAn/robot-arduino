@@ -1,32 +1,40 @@
+/*
+  This class reads yaw/roll/pitch data from the MPU6060
+
+  Based on MPU6050_DMP6 example for MPU6050 library by Electronic Cats
+  https://github.com/sponsors/ElectronicCats
+
+  GY-521  NodeMCU       Description
+  ======= ==========    ====================================================
+  VCC     VU (5V USB)   Not available on all boards so use 3.3V if needed.
+  GND     G             Ground
+  SCL     D1 (GPIO5)    I2C clock
+  SDA     D2 (GPIO4)    I2C data
+  XDA     not connected
+  XCL     not connected
+  AD0     not connected
+  INT     not connected
+*/
+
 #ifndef GYRO_H
 #define GYRO_H
 
-#include <Wire.h>
-#include <MPU6050.h>
-#include <MadgwickAHRS.h>
+#include <Arduino.h>
 
-// по умолчанию драйвер MPU6050 настраивает акселерометр/гироскоп
-// на самую высокую чувствительность +/- 2g и +/- 250 град/сек
-
-#define ACCEL_RAW_TO_FS(x) ((x)*2.0) / 32768.0
-#define GYRO_RAW_TO_FS(x) ((x)*250.0) / 32768.0
-#define TEMP_RAW_TO_FS(x) ((x) / 340.0) + 36.53
-
-class Gyro
+class GyroClass
 {
 private:
-  MPU6050 mpu;
-  Madgwick filter;
-  unsigned long period, timer;
+  bool dmpReady;
 
 public:
   uint8_t deviceID;
-  float ax, ay, az, gx, gy, gz, t;
   float roll, pitch, yaw;
 
-  bool init(unsigned long _period);
+  bool init();
   bool getMotion();
-  uint8_t getDeviceID() { return mpu.getDeviceID(); };
+  uint8_t getDeviceID() { return deviceID; };
 };
+
+extern GyroClass Gyro;
 
 #endif // GYRO_H

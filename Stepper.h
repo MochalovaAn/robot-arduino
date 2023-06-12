@@ -4,24 +4,25 @@
 #include <AccelStepper.h>
 
 // ULN2003 motor driver pins
+//
+// ULN2003 NodeMCU       Description
+// ======= ==========    ====================================================
+// INT1    D3 (GPIO00)
+// INT2    D4 (GPIO02)
+// INT3    D5 (GPIO14)
+// INT4    D6 (GPIO12)
 
-#define IN1 D1
-#define IN2 D2
+#define IN1 D3
+#define IN2 D4
 #define IN3 D5
 #define IN4 D6
-
-// #define INTERFACE AccelStepper::HALF4WIRE // полушаговый, 4 проводной
-// #define STEPS_PER_REVOLUTION 4096
 
 #define INTERFACE AccelStepper::FULL4WIRE // полношаговый, 4 проводной
 #define STEPS_PER_REVOLUTION 2048
 
-class Stepper : virtual public AccelStepper
-{
-public:
-  Stepper() : AccelStepper(INTERFACE, IN1, IN3, IN2, IN4, false){};
+// #define INTERFACE AccelStepper::HALF4WIRE // полушаговый, 4 проводной
+// #define STEPS_PER_REVOLUTION 4096
 
-  uint16_t stepsPerRevolution() { return STEPS_PER_REVOLUTION; }
-};
+extern AccelStepper Stepper;
 
 #endif // STEPPER_H

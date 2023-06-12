@@ -1,4 +1,5 @@
 #include "Web.h"
+#include "Program.h"
 
 void handleProgram(AsyncWebServerRequest *request)
 {
@@ -9,13 +10,13 @@ void handleProgram(AsyncWebServerRequest *request)
   {
     DynamicJsonDocument doc(128);
 
-    doc["state"] = program.state();
-    doc["line"] = program.line();
-    doc["count"] = program.count();
-    doc["cycle"] = program.cycle();
-    doc["isRunning"] = program.isRunning();
-    doc["timer"] = program.timer();
-    doc["pause"] = program.pause();
+    doc["state"] = Program.state();
+    doc["line"] = Program.line();
+    doc["count"] = Program.count();
+    doc["cycle"] = Program.cycle();
+    doc["isRunning"] = Program.isRunning();
+    doc["timer"] = Program.timer();
+    doc["pause"] = Program.pause();
 
     String content;
     serializeJson(doc, content);
@@ -34,7 +35,7 @@ void handleProgramText(AsyncWebServerRequest *request)
 
   if (request->method() == HTTP_GET)
   {
-    String content = program.getAsText();
+    String content = Program.getAsText();
 
     request->send(200, "text/plain", content);
     Serial.println(200);
@@ -51,7 +52,7 @@ void handleProgramText(AsyncWebServerRequest *request)
     request->send(204);
     Serial.println(204);
 
-    program.setAsText(text);
+    Program.setAsText(text);
   }
   else
     methodNotAllowed(request, "GET, POST");
@@ -67,7 +68,7 @@ void handleProgramRun(AsyncWebServerRequest *request)
     request->send(204);
     Serial.println(204);
 
-    program.run();
+    Program.run();
   }
   else
     methodNotAllowed(request, "POST");
@@ -85,7 +86,7 @@ void handleProgramStop(AsyncWebServerRequest *request)
     request->send(204);
     Serial.println(204);
 
-    program.stop(force != 0);
+    Program.stop(force != 0);
   }
   else
     methodNotAllowed(request, "POST");

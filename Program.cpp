@@ -1,16 +1,12 @@
 #include "Program.h"
+#include "Stepper.h"
 
-Program::Program(AccelStepper *stepper)
-    : _stepper(stepper), _count(0), _line(0), _cycle(0), _state(PROGRAM_NOTEXT), _timer(0), _pause(false)
-{
-}
-
-bool Program::setAsText(const String &text)
+bool ProgramClass::setAsText(const String &text)
 {
   return setAsText(text.c_str());
 }
 
-bool Program::setAsText(const char *text)
+bool ProgramClass::setAsText(const char *text)
 {
   Command *command;
   size_t i;
@@ -59,7 +55,7 @@ bool Program::setAsText(const char *text)
   return true;
 }
 
-String Program::getAsText()
+String ProgramClass::getAsText()
 {
   String text = "";
   Command *command;
@@ -76,7 +72,7 @@ String Program::getAsText()
   return text;
 }
 
-bool Program::execute()
+bool ProgramClass::execute()
 {
   bool timeIsOwer;
   Command *command;
@@ -91,7 +87,7 @@ bool Program::execute()
 
   timeIsOwer = (_timer != 0) && (millis() > _timer);
 
-  if ((_stepper->isRunning() || _pause) && !timeIsOwer)
+  if ((Stepper.isRunning() || _pause) && !timeIsOwer)
     return true;
 
   // сбрасываем сработавший таймер - он запускается только для одной команды
@@ -107,7 +103,7 @@ bool Program::execute()
 
   if (_line == _count)
   {
-    _stepper->setCurrentPosition(_stepper->currentPosition());
+    Stepper.setCurrentPosition(Stepper.currentPosition());
     _state = PROGRAM_STOP;
 
     Serial.println("Program: End");
@@ -130,32 +126,32 @@ bool Program::execute()
       switch (command->name[1])
       {
       case 'p': // speed
-        _stepper->setMaxSpeed(command->value);
+        Stepper.setMaxSpeed(command->value);
         break;
 
       case 't': // stop
         int force = (int)command->value;
-        force ? _stepper->setCurrentPosition(_stepper->currentPosition()) : _stepper->stop();
+        force ? Stepper.setCurrentPosition(Stepper.currentPosition()) : Stepper.stop();
         break;
       }
       break;
 
     case 'a': // acceleration
-      _stepper->setAcceleration(command->value);
+      Stepper.setAcceleration(command->value);
       break;
 
     case 'r':
       switch (command->name[1])
       {
       case 'o': // rotate
-        _stepper->move((long)command->value);
+        Stepper.move((long)command->value);
         return true;
 
       case 'e':
         switch (command->name[2])
         {
         case 's': // reset
-          _stepper->setCurrentPosition((long)command->value);
+          Stepper.setCurrentPosition((long)command->value);
           break;
 
         case 'p': // repeat
@@ -181,12 +177,12 @@ bool Program::execute()
   return true;
 }
 
-bool Program::run()
+bool ProgramClass::run()
 {
   if (_state != PROGRAM_STOP)
     return false;
 
-  _stepper->setCurrentPosition(0);
+  Stepper.setCurrentPosition(0);
 
   _state = PROGRAM_RUN;
   _cycle = 1;
@@ -199,15 +195,17 @@ bool Program::run()
   return true;
 }
 
-bool Program::stop(int force)
+bool ProgramClass::stop(int force)
 {
   if (_state != PROGRAM_RUN)
     return false;
 
-  force ? _stepper->setCurrentPosition(_stepper->currentPosition()) : _stepper->stop();
+  force ? Stepper.setCurrentPosition(Stepper.currentPosition()) : Stepper.stop();
   _state = PROGRAM_STOP;
 
   Serial.println("Program: Stop");
 
   return true;
 }
+
+ProgramClass Program;

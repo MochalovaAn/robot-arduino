@@ -85,21 +85,13 @@ source.addEventListener(
       appendChart(speed_chart, 0, time, stepperSpeed);
       appendChart(speed_chart, 1, time, data.stepper.currentSpeed);
 
-      // appendChart(acceleration_chart, 0, time, (100 * Math.abs(data.gyro.ax)) / 2);
-      // appendChart(acceleration_chart, 1, time, (100 * Math.abs(data.gyro.ay)) / 2);
-      // appendChart(acceleration_chart, 2, time, (100 * Math.abs(data.gyro.az)) / 2);
-      // appendChart(acceleration_chart, 3, time, (100 * data.stepper.acceleration) / data.stepper.stepsPerRevolution);
-
       const stepperPosition = data.stepper.currentPosition % data.stepper.stepsPerRevolution;
-      const stepperAngle = Math.abs(360 * stepperPosition) / data.stepper.stepsPerRevolution;
-
-      // appendChart(gyro_chart, 0, time, data.gyro.roll);
-      // appendChart(gyro_chart, 1, time, data.gyro.pitch);
-      // appendChart(gyro_chart, 2, time, data.gyro.yaw);
-      // appendChart(gyro_chart, 3, time, stepperAngle);
+      const stepperAngle = Math.abs(360 * stepperPosition) / data.stepper.stepsPerRevolution - 180;
 
       appendChart(gyro_chart, 0, time, stepperAngle);
-      // appendChart(gyro_chart, 2, time, data.gyro.yaw);
+      appendChart(gyro_chart, 1, time, data.gyro.yaw);
+      // appendChart(gyro_chart, 2, time, data.gyro.pitch);
+      // appendChart(gyro_chart, 3, time, data.gyro.roll);
     }
 
     millis.innerHTML = `${data.millis} - ${data.clients}/10`;

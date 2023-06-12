@@ -48,11 +48,6 @@ program_text = "acceleration 500\r\nspeed 1000\r\nmove 2048\r\n"
 response = requests.post("http://172.16.0.1/program/text?text=" + program_text)
 print("POST program/text?text=", response.status_code, response.reason)
 
-headers = { 'Content-Type': 'text/plain' }
-program_text = "acceleration 500\r\nspeed 1000\r\nmove 2048\r\n"
-response = requests.post("http://172.16.0.1/program/text", headers=headers, data=program_text)
-print("POST /program/text", response.status_code, response.reason)
-
 response = requests.post("http://172.16.0.1/program/run")
 print("POST /program/run", response.status_code, response.reason)
 

@@ -1,4 +1,5 @@
 #include "Web.h"
+#include "Stepper.h"
 
 void handleStepper(AsyncWebServerRequest *request)
 {
@@ -9,14 +10,14 @@ void handleStepper(AsyncWebServerRequest *request)
   {
     DynamicJsonDocument doc(1024);
 
-    doc["acceleration"] = stepper.acceleration();
-    doc["speed"] = stepper.maxSpeed();
-    doc["currentSpeed"] = stepper.speed();
-    doc["currentPosition"] = stepper.currentPosition();
-    doc["targetPosition"] = stepper.targetPosition();
-    doc["distanceToGo"] = stepper.distanceToGo();
-    doc["isRunning"] = stepper.isRunning();
-    doc["stepsPerRevolution"] = stepper.stepsPerRevolution();
+    doc["acceleration"] = Stepper.acceleration();
+    doc["speed"] = Stepper.maxSpeed();
+    doc["currentSpeed"] = Stepper.speed();
+    doc["currentPosition"] = Stepper.currentPosition();
+    doc["targetPosition"] = Stepper.targetPosition();
+    doc["distanceToGo"] = Stepper.distanceToGo();
+    doc["isRunning"] = Stepper.isRunning();
+    doc["stepsPerRevolution"] = STEPS_PER_REVOLUTION;
 
     String content;
     serializeJson(doc, content);
@@ -29,19 +30,19 @@ void handleStepper(AsyncWebServerRequest *request)
     if (request->hasArg("acceleration"))
     {
       float acceleration = request->arg("acceleration").toFloat();
-      stepper.setAcceleration(acceleration);
+      Stepper.setAcceleration(acceleration);
     }
 
     if (request->hasArg("speed"))
     {
       float speed = request->arg("speed").toFloat();
-      stepper.setMaxSpeed(speed);
+      Stepper.setMaxSpeed(speed);
     }
 
     if (request->hasArg("rotate"))
     {
       long relative = request->arg("rotate").toInt();
-      stepper.move(relative);
+      Stepper.move(relative);
     }
 
     request->send(204);
@@ -64,7 +65,7 @@ void handleStepperRotate(AsyncWebServerRequest *request)
     if (request->hasArg("steps"))
     {
       long relative = request->arg("steps").toInt();
-      stepper.move(relative);
+      Stepper.move(relative);
 
       Serial.print(relative);
       Serial.print(" ");
@@ -85,7 +86,7 @@ void handleStepperStop(AsyncWebServerRequest *request)
   if (request->method() == HTTP_POST)
   {
     int force = request->arg("force").toInt();
-    force ? stepper.setCurrentPosition(stepper.currentPosition()) : stepper.stop();
+    force ? Stepper.setCurrentPosition(Stepper.currentPosition()) : Stepper.stop();
 
     request->send(204);
     Serial.println(204);
@@ -102,7 +103,7 @@ void handleStepperReset(AsyncWebServerRequest *request)
   if (request->method() == HTTP_POST)
   {
     long position = request->arg("position").toInt();
-    stepper.setCurrentPosition(position);
+    Stepper.setCurrentPosition(position);
 
     request->send(204);
     Serial.println(204);
@@ -118,7 +119,7 @@ void handleStepperEnable(AsyncWebServerRequest *request)
 
   if (request->method() == HTTP_POST)
   {
-    stepper.enableOutputs();
+    Stepper.enableOutputs();
 
     request->send(204);
     Serial.println(204);
@@ -134,7 +135,7 @@ void handleStepperDisable(AsyncWebServerRequest *request)
 
   if (request->method() == HTTP_POST)
   {
-    stepper.disableOutputs();
+    Stepper.disableOutputs();
 
     request->send(204);
     Serial.println(204);

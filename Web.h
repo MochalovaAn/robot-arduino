@@ -1,7 +1,12 @@
 #ifndef WEB_H
 #define WEB_H
 
-#include "Extern.h"
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <LittleFS.h>
+#include <ArduinoJson.h>
 
 bool handleCaptivePortal(AsyncWebServerRequest *request);
 
@@ -23,7 +28,7 @@ void handleFile(AsyncWebServerRequest *request);
 void handleNotFound(AsyncWebServerRequest *request);
 
 void eventsOnConnect(AsyncEventSourceClient *client);
-void eventsSendStatus(unsigned long now);
+void eventsSendStatus(AsyncEventSource *events, unsigned long now);
 
 void logRequest(AsyncWebServerRequest *request, bool eol);
 void badRequest(AsyncWebServerRequest *request);

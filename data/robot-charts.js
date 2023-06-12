@@ -57,7 +57,7 @@ function appendChart(chart, index, x, y) {
 }
 
 function clearChart(chart) {
-  chart.series.forEach(x => x.setData([], false));
+  chart.series.forEach((x) => x.setData([], false));
   chart.redraw();
 }
 
@@ -68,23 +68,15 @@ var speed_chart = createChart("speed-chart", "Скорость вращения 
   { name: "Текущая", color: colors[0] },
 ]);
 
-// var acceleration_chart = createChart("acceleration-chart", "Ускорение", 0, 100, [
-//   { name: "Гироскоп X", color: colors[2], visible: false },
-//   { name: "Гироскоп Y", color: colors[3], visible: false },
-//   { name: "Гироскоп Z", color: colors[4] },
-//   { name: "Двигатель", color: colors[0] },
-// ]);
-
-var gyro_chart = createChart("gyro-chart", "Угол поворота", 0, 360, [
-  // { name: "Крен (X)", color1: colors[2], visible: false },
-  // { name: "Тангаж (Y)", color1: colors[3], visible: false },
-  // { name: "Рыскание (Z)", color1: colors[4], visible: false },
+var gyro_chart = createChart("gyro-chart", "Угол поворота", -180, 180, [
   { name: "Двигатель", color1: colors[0] },
-  { name: "Робот", color1: colors[4], visible: false },
+  { name: "Робот", color1: colors[4] },
+  // { name: "Рыскание (Z)", color1: colors[4], visible: false },
+  // { name: "Тангаж (Y)", color1: colors[3], visible: false },
+  // { name: "Крен (X)", color1: colors[2], visible: false },
 ]);
 
 function clearCharts() {
   clearChart(speed_chart);
-  clearChart(acceleration_chart);
   clearChart(gyro_chart);
 }
